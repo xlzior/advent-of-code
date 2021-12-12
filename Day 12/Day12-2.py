@@ -1,6 +1,31 @@
 import collections
-import queue
 import sys
+
+
+class Day12:
+    def __init__(self, neighbours):
+        self.count = 0
+        self.neighbours = neighbours
+
+    def visit(self, cave: str, history: set, quota_used: bool):
+        if cave == "end":
+            self.count += 1
+            return
+
+        for neighbour in neighbours[cave]:
+            if cave == "start" and len(history) > 1:
+                return
+            new_history = history.copy()
+            new_history.add(neighbour)
+            if neighbour.isupper() or neighbour not in history:
+                self.visit(neighbour, new_history, quota_used)
+            elif not quota_used:
+                self.visit(neighbour, new_history, True)
+
+    def run(self):
+        self.visit("start", {"start"}, False)
+        print(self.count)
+
 
 with open(sys.argv[1]) as file:
     lines = file.read().split("\n")
@@ -11,23 +36,4 @@ for line in lines:
     neighbours[u].append(v)
     neighbours[v].append(u)
 
-minions = queue.Queue()
-minions.put(['start'])
-count = 0
-
-while not minions.empty():
-    minion = minions.get()
-    cave = minion[-1]
-    if cave == "end":
-        count += 1
-        continue
-    for neighbour in neighbours[cave]:
-        if neighbour == "start":  # can't revisit start
-            continue
-
-        small_caves = list(filter(lambda x: x.islower(), minion))
-        num_small_caves_visited_twice = len(small_caves) - len(set(small_caves))
-        if neighbour.isupper() or num_small_caves_visited_twice <= 1:
-            minions.put(minion + [neighbour])
-
-print(count)
+Day12(neighbours).run()
