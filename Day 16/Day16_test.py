@@ -1,4 +1,5 @@
-from Day16 import parse_and_evaluate
+# from Day16 import parse_and_evaluate
+from Day16_next import PacketParser
 
 # public tests cases
 part_1_tests = [
@@ -19,23 +20,27 @@ part_2_tests = [
     ("9C0141080250320F1802104A08", 1)
 ]
 
-HEADER = '\033[94m'
+BLUE = '\033[94m'
 GREEN = '\033[92m'
 RED = '\033[91m'
 ENDC = '\033[0m'
 
-print(f"{HEADER}Part 1 Public Test Cases{ENDC}")
+parser = PacketParser()
+
+print(f"{BLUE}Part 1 Public Test Cases{ENDC}")
 for sample, expected_version in part_1_tests:
-    observed_version, _ = parse_and_evaluate(sample)
+    # observed_version, _ = parse_and_evaluate(sample)
+    observed_version = parser.parse(sample).version_sum()
     if observed_version == expected_version:
         print(f"{GREEN}✓ {sample} -> version sum: {expected_version}{ENDC}")
     else:
         print(f"{RED}✗ {sample} version sum; Expected: {expected_version}, received {observed_version}{ENDC}")
 
 print()
-print(f"{HEADER}Part 2 Public Test Cases{ENDC}")
+print(f"{BLUE}Part 2 Public Test Cases{ENDC}")
 for sample, expected_value in part_2_tests:
-    _, observed_value = parse_and_evaluate(sample)
+    # _, observed_value = parse_and_evaluate(sample)
+    observed_value = parser.parse(sample).eval()
     if observed_value == expected_value:
         print(f"{GREEN}✓ {sample} -> value: {expected_value}{ENDC}")
     else:
