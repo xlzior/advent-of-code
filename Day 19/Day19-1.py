@@ -46,7 +46,7 @@ class Delta:
         zipped_coords = list(zip(point1.get_coordinates(), point2.get_coordinates()))
         self.point1 = point1
         self.point2 = point2
-        self.absolute_diff = list(map(lambda tup: abs(tup[0] - tup[1]), zipped_coords))
+        self.absolute_diff = sorted(list(map(lambda tup: abs(tup[0] - tup[1]), zipped_coords)))
         self.differences = list(map(lambda tup: tup[0] - tup[1], zipped_coords))
 
     def __str__(self):
@@ -57,7 +57,7 @@ class Delta:
         return Delta(self.point2, self.point1)
 
     def overlaps_with(self, other: Delta):
-        return set(self.absolute_diff) == set(other.absolute_diff)
+        return self.absolute_diff == other.absolute_diff
 
 def beacons_to_points(raw_beacons):
     points = list()
@@ -67,29 +67,15 @@ def beacons_to_points(raw_beacons):
     return points
 
 def get_transformation_matrix(delta1: Delta, delta2: Delta):
-    a, b, c = delta1.differences
     result = [[0 for _ in range(3)] for _ in range(3)]
 
-    if a in delta2.differences:
-        a_index = delta2.differences.index(a)
-        result[0][a_index] = 1
-    else:
-        a_index = delta2.differences.index(-a)
-        result[0][a_index] = -1
-
-    if b in delta2.differences:
-        b_index = delta2.differences.index(b)
-        result[1][b_index] = 1
-    else:
-        b_index = delta2.differences.index(-b)
-        result[1][b_index] = -1
-
-    if c in delta2.differences:
-        c_index = delta2.differences.index(c)
-        result[2][c_index] = 1
-    else:
-        c_index = delta2.differences.index(-c)
-        result[2][c_index] = -1
+    for i in range(3):
+        if delta1.differences[i] in delta2.differences:
+            index = delta2.differences.index(delta1.differences[i])
+            result[i][index] = 1
+        else:
+            index = delta2.differences.index(-delta1.differences[i])
+            result[i][index] = -1
 
     return result
 
@@ -107,9 +93,7 @@ class Scanner:
         return Point(result[0], result[1], result[2])
 
     def transform_and_translate(self, point):
-        transformed = self.transform(point)
-        result = transformed + self.position
-        return result
+        return self.transform(point) + self.position
 
     def resolve_first(self):
         self.position = Point(0, 0, 0)
@@ -120,30 +104,25 @@ class Scanner:
         overlaps = self.overlaps_with[basis]
         reference = scanners[basis]
 
-        index = 0
-        my_delta, reference_delta = overlaps[index]  # look at the first overlap to derive matrix and position
+        my_delta, reference_delta = overlaps[0]  # look at the first overlap to derive matrix and position
         reference_point = reference_delta.point1
         possible_corresponding_points = {my_delta.point1, my_delta.point2}
-        for overlap in overlaps[index+1:]:  # find a second overlap so we can identify the corresponding point
+        for overlap in overlaps[1:]:  # find a second overlap so we can identify the corresponding point
             my_next_delta, other_next_delta = overlap
             if other_next_delta.point1 == reference_point or other_next_delta.point2 == reference_point:
                 if my_next_delta.point1 in possible_corresponding_points:
                     my_point = my_next_delta.point1
-                    if my_delta.point2 == my_point:
-                        my_delta = -my_delta
                 elif my_next_delta.point2 in possible_corresponding_points:
                     my_point = my_next_delta.point2
-                    if my_delta.point2 == my_point:
-                        my_delta = -my_delta
                 break
+
+        if my_delta.point2 == my_point:
+            my_delta = -my_delta
 
         ref_ref_point = reference.transform_and_translate(reference_point)
         self.matrix = np.matmul(get_transformation_matrix(my_delta, reference_delta), reference.matrix)
         self.position = ref_ref_point - self.transform(my_point)
         self.beacons = list(map(self.transform_and_translate, self.raw_beacons))
-
-def swap_tuple(tup):
-    return tup[1], tup[0]
 
 
 with open(sys.argv[1]) as file:
@@ -160,8 +139,7 @@ for i, j in combinations(range(len(puzzle_input)), 2):
         neighbours[i].append(j)
         neighbours[j].append(i)
         scanners[i].overlaps_with[j] = overlaps  # overlaps is a list of tuples with (my_delta, other_delta)
-        scanners[j].overlaps_with[i] = list(map(swap_tuple, overlaps))
-
+        scanners[j].overlaps_with[i] = list(map(lambda tup: (tup[1], tup[0]), overlaps))
 
 scanners[0].resolve_first()
 standardised_beacons = set(scanners[0].beacons)
