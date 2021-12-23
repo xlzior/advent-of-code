@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.stream.IntStream;
 
 class Cuboid {
     int startX;
@@ -49,21 +48,27 @@ public class Day22 {
         Scanner sc = new Scanner(System.in);
         while (sc.hasNext()) {
             String[] input = sc.nextLine().split(" x=|,y=|,z=|\\.\\.");
-            int[] coords = IntStream.range(1, 7).map(i -> Integer.parseInt(input[i])).toArray();
             String state = input[0];
-            originals.add(new Cuboid(coords[0], coords[1], coords[2],
-                    coords[3], coords[4], coords[5], state.equals("on")));
+            int startX = Integer.parseInt(input[1]);
+            int endX = Integer.parseInt(input[2]);
+            int startY = Integer.parseInt(input[3]);
+            int endY = Integer.parseInt(input[4]);
+            int startZ = Integer.parseInt(input[5]);
+            int endZ = Integer.parseInt(input[6]);
+            originals.add(new Cuboid(startX, endX, startY, endY, startZ, endZ, state.equals("on")));
         }
 
         long count = 0;
         for (Cuboid original : originals) {
-            for (Cuboid cuboid : new ArrayList<>(cuboids)) {
+            ArrayList<Cuboid> newCuboids = new ArrayList<>();
+            for (Cuboid cuboid : cuboids) {
                 Cuboid intersection = original.intersect(cuboid);
                 if (intersection != null) {
-                    cuboids.add(intersection);
+                    newCuboids.add(intersection);
                     count += intersection.size();
                 }
             }
+            cuboids.addAll(newCuboids);
             if (original.isOn) {
                 cuboids.add(original);
                 count += original.size();
