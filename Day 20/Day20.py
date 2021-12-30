@@ -1,4 +1,6 @@
 import sys
+import time
+
 
 def get_surrounding_9(x, y):
     return "".join(["".join(image[j][x - 1:x + 2]) for j in range(y - 1, y + 2)])
@@ -14,6 +16,17 @@ def enhance(i):
             surrounding_pixels = int(get_surrounding_9(x, y), 2)
             new_image[y][x] = algorithm[surrounding_pixels]
     return new_image
+
+def draw(image, last=False):
+    for y in range(buffered_height):
+        row = list()
+        for x in range(buffered_width):
+            row.append(chr(9608) if image[y][x] == "1" else " ")
+        print("".join(row))
+
+    if not last:
+        print(f"\u001b[{buffered_height + 1}A\u001b[{buffered_width}D")
+        time.sleep(0.5)
 
 
 with open(sys.argv[1]) as file:
@@ -38,5 +51,8 @@ for y in range(height):
 
 for i in range(rounds):
     image = enhance(i)
+    draw(image)
+
+draw(image, True)
 
 print(sum(list(map(lambda row: sum(map(int, row)), image))))
