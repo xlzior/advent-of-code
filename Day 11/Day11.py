@@ -1,5 +1,6 @@
 import queue
 import sys
+import time
 
 
 class Point:
@@ -70,21 +71,32 @@ class OctopusManager:
         if len(flashed) == self.height * self.width:  # part 2
             return True
 
+    def draw(self, last=False):
+        if not last:
+            print()  # so the cursor doesn't interfere with the animation
+        for y in range(self.height):
+            row = list()
+            for x in range(self.width):
+                num = self.energy_levels[y][x]
+                row.append(str(num) if num > 0 else "\u001b[43;1m0\u001b[0m")
+            print("".join(row))
+        if not last:
+            print(f"\u001b[{self.height + 2}A\u001b[{self.width}D")
+            sys.stdout.flush()
+            time.sleep(0.5)
+
     def run(self):
-        is_part2_done = False
-        i = 0
-
-        for i in range(100):
+        i = 1
+        while True:
             if self.step():
-                print("Part 2:", i + 1)
-                is_part2_done = True
-        print("Part 1:", self.flash_counter)
-
-        while not is_part2_done:
+                print("Part 2:", i)
+                break
+            if i == 100:
+                print("Part 1:", self.flash_counter)
             i += 1
-            if self.step():
-                print("Part 2:", i + 1)
-                is_part2_done = True
+            if i > 230:  # animate the ending only
+                self.draw()
+        self.draw(True)
 
 
 with open(sys.argv[1]) as file:
