@@ -5,6 +5,8 @@ import sys
 from itertools import combinations
 import numpy as np
 
+import time
+
 class Point:
     def __init__(self, x, y, z):
         self.x = x
@@ -125,6 +127,7 @@ class Scanner:
         self.beacons = list(map(self.transform_and_translate, self.raw_beacons))
 
 
+start_time = time.time()
 with open(sys.argv[1]) as file:
     puzzle_input = file.read().split("\n\n")
 
@@ -157,3 +160,4 @@ for scanner in scanners:
     print(scanner.position)
 
 print(len(standardised_beacons))
+print("--- %s seconds ---" % (time.time() - start_time))
