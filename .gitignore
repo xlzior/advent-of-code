@@ -1,6 +1,8 @@
 
+.vscode/
 .idea/
 *.txt
 *.pyc
 *.class
 *.iml
+.DS_Store
