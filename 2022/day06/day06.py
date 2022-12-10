@@ -1,13 +1,16 @@
 import sys
 
 
-def all_unique(x):
-    return len({c for c in x[1]}) == len(x[1])
-
-
 def find_marker(packet, n):
-    windows = [packet[i : i + n] for i in range(len(packet) - n + 1)]
-    return next(filter(all_unique, enumerate(windows)))[0] + n
+    return (
+        next(
+            filter(
+                lambda x: len(set(x[1])) == len(x[1]),
+                enumerate(packet[i : i + n] for i in range(len(packet) - n + 1)),
+            )
+        )[0]
+        + n
+    )
 
 
 test_cases = [
