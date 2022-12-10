@@ -3,19 +3,28 @@ from collections import Counter
 
 
 def find_marker(packet, n):
-    counter = Counter(packet[: n - 1])
+    counter = Counter()
+    num_unique = 0
     left = 0
-    for c in packet[n - 1 :]:
+
+    for i, c in enumerate(packet):
+        if i >= n:
+            # pop the leftmost character
+            counter[packet[left]] -= 1
+            if counter[packet[left]] == 0:
+                num_unique -= 1
+            left += 1
+
+        # push the rightmost character
         counter[c] += 1
-        if len(counter) == n:
+        if counter[c] == 1:
+            num_unique += 1
+        if num_unique == n:
             return left + n
-        counter[packet[left]] -= 1
-        if counter[packet[left]] == 0:
-            del counter[packet[left]]
-        left += 1
 
 
 test_cases = [
+    ("abcdefghijklmnopqrstuvwxyz", 4, 14),
     ("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 7, 19),
     ("bvwbjplbgvbhsrlpgdmjqwftvncz", 5, 23),
     ("nppdvjthqldpwncqszvftbrmjlhg", 6, 23),
