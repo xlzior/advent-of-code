@@ -16,13 +16,7 @@ max_radius = 0
 known_beacons = set()
 
 for line in puzzle_input:
-    sx, sy, bx, by = map(
-        int,
-        re.match(
-            r"Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)",
-            line,
-        ).groups(),
-    )
+    sx, sy, bx, by = map(int, re.findall(r"(-?\d+)", line))
     if by == y:
         known_beacons.add((bx, by))
     radius = distance(sx, sy, bx, by)
