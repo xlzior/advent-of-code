@@ -8,6 +8,8 @@ OPERATIONS = {
     "/": lambda a, b: a / b,
 }
 
+INVERSE = {"+": "-", "-": "+", "*": "/", "/": "*"}
+
 
 def parse(line):
     key, *value = line.replace(":", "").split(" ")
@@ -15,38 +17,47 @@ def parse(line):
 
 
 def get(key):
+    if isinstance(monkeys[key], int):
+        return monkeys[key]
+
     if len(monkeys[key]) == 1:
-        return int(monkeys[key][0])
+        value = int(monkeys[key][0])
+    else:
+        a, op, b = monkeys[key]
+        if get(a) == -1 or get(b) == -1:
+            return -1
+        value = int(OPERATIONS[op](get(a), get(b)))
+    monkeys[key] = value
+    return value
 
-    a, op, b = monkeys[key]
-    return OPERATIONS[op](get(a), get(b))
 
-
-monkeys = dict(map(parse, open(sys.argv[-1]).read().split("\n")))
-
+puzzle_input = open(sys.argv[-1]).read().split("\n")
+monkeys = dict(map(parse, puzzle_input))
 print("Part 1:", int(get("root")))
 
+monkeys = dict(map(parse, puzzle_input))
+monkeys["humn"] = -1
 
-def create_variable(key):
-    return (key, intvar(1, 1_000_000_000_000_000, name=key))
+a, _, b = monkeys["root"]
+a_val, b_val = get(a), get(b)
+if a_val == -1:
+    curr, value = a, b_val
+else:
+    curr, value = b, a_val
 
+while curr != "humn":
+    a, op, b = monkeys[curr]
+    a_val, b_val = get(a), get(b)
+    if a_val == -1:  # a contains humn, make a the subject
+        curr = a
+        value = OPERATIONS[INVERSE[op]](value, b_val)
+    else:  # b contains humn, make b the subject
+        curr = b
+        value = {
+            "+": value - a_val,
+            "-": a_val - value,
+            "*": value / a_val,
+            "/": a_val / value,
+        }[op]
 
-def create_constraint(key):
-    if key == "humn":
-        return
-
-    if len(monkeys[key]) == 1:
-        return vars[key] == int(monkeys[key][0])
-
-    a, op, b = monkeys[key]
-    if key == "root":
-        return vars[a] == vars[b]
-
-    return vars[key] == OPERATIONS[op](vars[a], vars[b])
-
-
-vars = dict(map(create_variable, monkeys))
-constraints = list(filter(bool, map(create_constraint, monkeys)))
-model = Model(constraints)
-model.solve()
-print("Part 2:", vars["humn"].value())
+print("Part 2:", int(value))
