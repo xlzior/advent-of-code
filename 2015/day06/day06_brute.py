@@ -8,6 +8,9 @@ instructions = map(parse, puzzle_input)
 
 switched_on = set()
 brightness = collections.defaultdict(int)
+
+# TODO: optimise to not check everything via brute force
+
 for setting, *nums in instructions:
     ax, ay, bx, by = map(int, nums)
     for x in range(ax, bx + 1):
