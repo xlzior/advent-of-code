@@ -1,8 +1,15 @@
+# macOS
+.DS_Store
 
+# AoC
+puzzle.txt
+
+# editors
 .vscode/
 .idea/
-puzzle.txt
 *.pyc
 *.class
 *.iml
-.DS_Store
+.bsp/
+.scala-build/
+.metals/
