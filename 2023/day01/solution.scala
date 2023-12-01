@@ -1,6 +1,15 @@
 import util.FileUtils
 
-val digits = Map(
+val mapping = Map(
+  "1" -> 1,
+  "2" -> 2,
+  "3" -> 3,
+  "4" -> 4,
+  "5" -> 5,
+  "6" -> 6,
+  "7" -> 7,
+  "8" -> 8,
+  "9" -> 9,
   "one" -> 1,
   "two" -> 2,
   "three" -> 3,
@@ -19,41 +28,17 @@ object Solution {
       .map(s => (s.take(1) + s.takeRight(1)).toInt)
       .sum
 
-  def getDigits(line: String): List[(Int, Int)] = {
-    val digitsOnly = line.filter(_.isDigit)
-
-    if (digitsOnly.isEmpty) {
-      return List()
-    }
-
-    val firstDigitIndex = line.indexOf(digitsOnly.head)
-    val firstDigit = (firstDigitIndex, line(firstDigitIndex).asDigit)
-    val lastDigitIndex = line.lastIndexOf(digitsOnly.last)
-    val lastDigit = (lastDigitIndex, line(lastDigitIndex).asDigit)
-    List(firstDigit, lastDigit)
-  }
-
-  def getWords(line: String): List[(Int, Int)] = {
-    val spelledOut = digits.keys
-      .flatMap(key =>
-        List((line.indexOf(key), key), (line.lastIndexOf(key), key))
-      )
-      .filter(_._1 != -1)
-
-    if (spelledOut.isEmpty) {
-      return List()
-    }
-
-    val (index1, word1) = spelledOut.minBy(_._1)
-    val (index2, word2) = spelledOut.maxBy(_._1)
-
-    List((index1, digits(word1)), (index2, digits(word2)))
-  }
-
   def part2(lines: List[String]): Int =
     lines
       .map(line => {
-        val numbers = getDigits(line) ++ getWords(line)
+        val numbers = mapping.keys
+          .flatMap(key =>
+            List(
+              (line.indexOf(key), mapping(key)),
+              (line.lastIndexOf(key), mapping(key))
+            )
+          )
+          .filter(_._1 != -1)
 
         val first = numbers.minBy(_._1)._2
         val last = numbers.maxBy(_._1)._2
@@ -72,6 +57,5 @@ object Solution {
         println(s"Part 2: ${part2(lines)}")
       }
     }
-
   }
 }
