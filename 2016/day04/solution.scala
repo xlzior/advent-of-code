@@ -2,9 +2,11 @@ import util.FileUtils
 
 object Solution {
   def checksum(name: String): String = {
-    val charCounts =
-      name.replaceAll("-", "").groupBy(identity).mapValues(_.length)
-    charCounts.toList
+    name
+      .replaceAll("-", "")
+      .groupBy(identity)
+      .mapValues(_.length)
+      .toList
       .sortBy { case (char, count) => (-count, char) }
       .take(5)
       .map(_._1)
