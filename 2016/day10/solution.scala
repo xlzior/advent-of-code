@@ -1,68 +1,89 @@
 import util.FileUtils
 
-class Destination
-case class Bot(id: Int) extends Destination {
-  override def toString(): String = s"bot $id"
-}
-case class Output(id: Int) extends Destination {
-  override def toString(): String = s"output $id"
-}
-
-class Rule(val low: Destination, val high: Destination) {
-  override def toString(): String = s"$low / $high"
-}
-
-type Chip = Int
-
 object Solution {
+  type Destination = (String, Int)
+  type Rule = (Destination, Destination)
+  type Rules = Map[Int, Rule]
+  type Chip = Int
+  type State = Array[List[Chip]]
+
   val rule =
     """bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+)""".r
   val chip = """value (\d+) goes to bot (\d+)""".r
 
+  def parse(
+      lines: List[String],
+      numBots: Int,
+      numOutputs: Int
+  ): (Rules, State, State) = {
+    val (rules, botState) = lines.foldLeft(
+      (Map[Int, Rule](), Array.fill[List[Chip]](numBots)(List.empty))
+    )((acc, curr) =>
+      curr match {
+        case rule(bot, lowType, low, highType, high) => {
+          val (rules, state) = acc
+          val rule = ((lowType, low.toInt), (highType, high.toInt))
+          (rules.updated(bot.toInt, rule), state)
+        }
+        case chip(value, bot) => {
+          val (rules, state) = acc
+          val botChips = state(bot.toInt).appended(value.toInt)
+          (rules, state.updated(bot.toInt, botChips))
+        }
+      }
+    )
+
+    val outputState = Array.fill[List[Chip]](numOutputs)(List.empty)
+
+    (rules, botState, outputState)
+  }
+
   def main(args: Array[String]): Unit = {
     val lines: List[String] = FileUtils.readFileContents(args(0))
 
-    val n =
-      """bot (\d+)""".r
-        .findAllMatchIn(lines.mkString)
-        .map(m => m.group(1).toInt)
-        .max + 1 // 0-indexing
+    val numBots = """bot (\d+)""".r
+      .findAllMatchIn(lines.mkString)
+      .map(m => m.group(1).toInt)
+      .max + 1 // 0-indexing
 
-    var (rules, state) =
-      lines.foldLeft((Map[Int, Rule](), Array.fill[List[Chip]](n)(List.empty)))(
-        (acc, curr) =>
-          curr match {
-            case rule(bot, lowType, low, highType, high) => {
-              val (rules, state) = acc
-              val b = bot.toInt
-              val l = low.toInt
-              val h = high.toInt
-              val lowDestination =
-                if (lowType == "output") Output(l) else Bot(l)
-              val highDestination =
-                if (highType == "output") Output(h) else Bot(h)
-              (rules.updated(b, Rule(lowDestination, highDestination)), state)
-            }
-            case chip(value, bot) => {
-              val (rules, state) = acc
-              val b = bot.toInt
-              val v = value.toInt
-              (rules, state.updated(b, state(b).appended(v)))
-            }
+    val numOutputs = """output (\d+)""".r
+      .findAllMatchIn(lines.mkString)
+      .map(m => m.group(1).toInt)
+      .max + 1 // 0-indexing
+
+    val (rules, botState, outputState) = parse(lines, numBots, numOutputs)
+
+    var stepped = true
+    while (stepped) {
+      stepped = false
+      (0 to numBots - 1).foreach(i => {
+        if (botState(i).length == 2) {
+          stepped = true
+          val (low, high) = rules(i)
+          val min = botState(i).min
+          val max = botState(i).max
+
+          if (min == 17 && max == 61) {
+            println(s"Part 1: $i")
           }
-      )
+          low._1 match {
+            case "output" =>
+              outputState(low._2) = outputState(low._2).appended(min)
+            case "bot" => botState(low._2) = botState(low._2).appended(min)
+          }
 
-    (0 to n).foreach(i => {
-      if (state(i).length == 2) {
-        val rule = rules(i)
-        val low = state(i).min
-        val high = state(i).max
-        state(i) = List()
-        state(rule.low) = low :: state(rule.low)
-        state(rule.high) = high :: state(rule.high)
-      }
-    })
+          high._1 match {
+            case "output" =>
+              outputState(high._2) = outputState(high._2).appended(max)
+            case "bot" => botState(high._2) = botState(high._2).appended(max)
+          }
 
-    println(state)
+          botState(i) = List.empty
+        }
+      })
+    }
+
+    println(s"Part 2: ${outputState.take(3).map(_.head).product}")
   }
+
 }
