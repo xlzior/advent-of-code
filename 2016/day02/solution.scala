@@ -1,17 +1,5 @@
 import util.FileUtils
-
-class Pair(val x: Int, val y: Int) {
-  def +(other: Pair): Pair = new Pair(x + other.x, y + other.y)
-  def *(factor: Int): Pair = new Pair(x * factor, y * factor)
-  def abs: Int = Math.abs(x) + Math.abs(y)
-  override def equals(x: Any): Boolean = {
-    x match {
-      case other: Pair => this.x == other.x && this.y == other.y
-      case _           => false
-    }
-  }
-  override def hashCode: Int = x.hashCode + y.hashCode
-}
+import util.Pair
 
 abstract class Keypad() {
   var location: Pair
