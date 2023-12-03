@@ -4,21 +4,22 @@ object Solution {
   type Destination = (String, Int)
   type Rule = (Destination, Destination)
   type Rules = Map[Int, Rule]
+  def Rules(): Rules = Map[Int, Rule]()
+
   type Chip = Int
-  type State = Array[List[Chip]]
+  type State = Map[Int, List[Chip]]
+  def State(): State = Map[Int, List[Chip]]().withDefaultValue(List.empty)
+
+  def updateState(state: State, key: Int, value: Int): State = {
+    state.updated(key, state(key).appended(value))
+  }
 
   val rule =
     """bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+)""".r
   val chip = """value (\d+) goes to bot (\d+)""".r
 
-  def parse(
-      lines: List[String],
-      numBots: Int,
-      numOutputs: Int
-  ): (Rules, State, State) = {
-    val (rules, botState) = lines.foldLeft(
-      (Map[Int, Rule](), Array.fill[List[Chip]](numBots)(List.empty))
-    )((acc, curr) =>
+  def parse(lines: List[String]): (Rules, State, State) = {
+    val (rules, bots) = lines.foldLeft((Rules(), State()))((acc, curr) =>
       curr match {
         case rule(bot, lowType, low, highType, high) => {
           val (rules, state) = acc
@@ -33,57 +34,46 @@ object Solution {
       }
     )
 
-    val outputState = Array.fill[List[Chip]](numOutputs)(List.empty)
-
-    (rules, botState, outputState)
+    (rules, bots, State())
   }
 
   def main(args: Array[String]): Unit = {
     val lines: List[String] = FileUtils.readFileContents(args(0))
 
-    val numBots = """bot (\d+)""".r
-      .findAllMatchIn(lines.mkString)
-      .map(m => m.group(1).toInt)
-      .max + 1 // 0-indexing
-
-    val numOutputs = """output (\d+)""".r
-      .findAllMatchIn(lines.mkString)
-      .map(m => m.group(1).toInt)
-      .max + 1 // 0-indexing
-
-    val (rules, botState, outputState) = parse(lines, numBots, numOutputs)
+    var (rules, bots, outputs) = parse(lines)
 
     var stepped = true
     while (stepped) {
       stepped = false
-      (0 to numBots - 1).foreach(i => {
-        if (botState(i).length == 2) {
+
+      bots.keys
+        .filter(i => bots(i).length == 2)
+        .foreach(i => {
           stepped = true
-          val (low, high) = rules(i)
-          val min = botState(i).min
-          val max = botState(i).max
+          val ((lowType, low), (highType, high)) = rules(i)
+          val (min, max) = (bots(i).min, bots(i).max)
 
           if (min == 17 && max == 61) {
             println(s"Part 1: $i")
           }
-          low._1 match {
-            case "output" =>
-              outputState(low._2) = outputState(low._2).appended(min)
-            case "bot" => botState(low._2) = botState(low._2).appended(min)
+
+          bots = bots.updated(i, List.empty)
+
+          lowType match {
+            case "output" => outputs = updateState(outputs, low, min)
+            case "bot"    => bots = updateState(bots, low, min)
           }
 
-          high._1 match {
-            case "output" =>
-              outputState(high._2) = outputState(high._2).appended(max)
-            case "bot" => botState(high._2) = botState(high._2).appended(max)
+          highType match {
+            case "output" => outputs = updateState(outputs, high, max)
+            case "bot"    => bots = updateState(bots, high, max)
           }
-
-          botState(i) = List.empty
-        }
-      })
+        })
     }
 
-    println(s"Part 2: ${outputState.take(3).map(_.head).product}")
+    println(
+      s"Part 2: ${outputs(0).head * outputs(1).head * outputs(2).head}"
+    )
   }
 
 }
