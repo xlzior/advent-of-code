@@ -1,5 +1,6 @@
 import util.FileUtils
 import util.Pair
+import util.Timer
 
 object Solution {
   val symbolPattern = """[^\d\s.]""".r
@@ -9,6 +10,9 @@ object Solution {
 
   def main(args: Array[String]): Unit = {
     val lines: List[String] = FileUtils.readFileContents(args(0))
+
+    val timer = Timer()
+    timer.checkpoint()
 
     val symbols = lines.zipWithIndex
       .flatMap((line, y) =>
@@ -37,6 +41,9 @@ object Solution {
 
     println(s"Part 1: $part1")
 
+    timer.checkpointPrint()
+    timer.checkpoint()
+
     val gears = lines.zipWithIndex.flatMap((line, y) =>
       gearPattern.findAllMatchIn(line).map(m => Pair(m.start, y))
     )
@@ -53,5 +60,7 @@ object Solution {
       .sum
 
     println(s"Part 2: $part2")
+
+    timer.checkpointPrint()
   }
 }
