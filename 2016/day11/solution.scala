@@ -29,27 +29,24 @@ object Solution {
     )
   }
 
-  def countFreeFloors(state: State): Int = {
-    state.zipWithIndex
-      .filter((items, _) => items.nonEmpty)
-      .headOption
-      .getOrElse((List.empty, 0))
-      ._2 + 1
+  type SummarisedState = List[(Int, Int)]
+
+  def summarise(state: State): SummarisedState = {
+    state.map(floor =>
+      (
+        floor.count((_, itemType) => itemType == "G"),
+        floor.count((_, itemType) => itemType == "M")
+      )
+    )
   }
 
   def move(
       state: State,
       items: List[(String, String)],
       from: Int,
-      to: Int,
-      bestFreeFloors: Int
+      to: Int
   ): Option[State] = {
     if (to < 0 || to >= 4) {
-      return None
-    }
-
-    // pruning: if I am going down, only bring one thing
-    if (to < from && items.length > 1) {
       return None
     }
 
@@ -58,11 +55,6 @@ object Solution {
       .updated(to, state(to).appendedAll(items))
 
     if (!isSafe(nextState)) {
-      return None
-    }
-
-    // pruning: if I already cleared a lower floor, don't go down there again
-    if (countFreeFloors(nextState) < bestFreeFloors) {
       return None
     }
 
@@ -83,10 +75,9 @@ object Solution {
 
     val elements = initialState.flatMap(floor => floor.map(_._1))
 
-    var bestFreeFloors = 0
-    val explored = Set[(State, Int)]()
+    val explored = Set[(SummarisedState, Int)]()
     val queue = Queue[(Int, State, Int)]()
-    explored.add((initialState, 0))
+    explored.add((summarise(initialState), 0))
     queue.enqueue((0, initialState, 0))
 
     val timer = Map[Int, Long]()
@@ -94,8 +85,6 @@ object Solution {
 
     while (queue.nonEmpty) {
       val (numSteps, state, floor) = queue.dequeue()
-
-      bestFreeFloors = bestFreeFloors.max(countFreeFloors(state))
 
       if (!timer.contains(numSteps)) {
         timer(numSteps) = System.currentTimeMillis()
@@ -115,13 +104,12 @@ object Solution {
       // elevator can either go up or down
       combinations.foreach(items => {
         List(-1, 1).foreach(direction => {
-          val nextState =
-            move(state, items, floor, floor + direction, bestFreeFloors)
+          val nextState = move(state, items, floor, floor + direction)
 
           if (nextState.isDefined) {
             val s = nextState.get
-            if (!explored.contains((s, floor + direction))) {
-              explored.add((s, floor + direction))
+            if (!explored.contains((summarise(s), floor + direction))) {
+              explored.add((summarise(s), floor + direction))
               queue.enqueue((numSteps + 1, s, floor + direction))
             }
           }
