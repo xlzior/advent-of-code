@@ -13,3 +13,5 @@ puzzle.txt
 .bsp/
 .scala-build/
 .metals/
+
+.venv/
