@@ -9,60 +9,35 @@ type Layout = List[List[Item]]
 type Summarised = (Int, List[List[(String, Int)]])
 
 class State(val floor: Int, val layout: Layout) {
-  def isSafe: Boolean = {
+  def isSafe: Boolean =
     // if a chip is ever left in the same area as another RTG,
     // and it's not connected to its own RTG, the chip will be fried
     layout.forall(floor => {
       val chips = floor.filter((_, item) => item == "M")
       val rtgs = floor.filter((_, item) => item == "G")
-
-      chips.forall((element, _) =>
-        rtgs.contains((element, "G")) || rtgs.isEmpty
-      )
+      chips.forall((elem, _) => rtgs.contains((elem, "G")) || rtgs.isEmpty)
     })
-  }
 
-  def isGoal: Boolean =
-    layout
-      .flatMap(floor => floor.map(_._1))
-      .forall(elem =>
-        layout(3).contains((elem, "G")) && layout(3).contains((elem, "M"))
-      )
+  def isGoal: Boolean = layout.slice(0, 3).forall(_.isEmpty)
 
   def summarised: Summarised =
     (floor, layout.map(_.groupBy(_._2).mapValues(_.length).toList))
 
-  def move(items: List[(String, String)], to: Int): Option[State] = {
-    if (to < 0 || to >= 4) return None
-
-    val nextState = State(
+  def move(items: List[Item], to: Int): State =
+    State(
       to,
       layout
         .updated(floor, layout(floor).diff(items))
         .updated(to, layout(to).appendedAll(items))
     )
 
-    if (!nextState.isSafe) return None
-
-    Some(nextState)
-  }
-
-  def steps: Iterator[(List[Item], Int)] = {
-    // elevator can either take 1 or 2 items
-    val singleItems = layout(floor)
-    val combinations =
-      singleItems.combinations(1) ++ singleItems.combinations(2)
-
-    combinations.flatMap(items =>
-      // elevator can either go up or down
-      List(-1, 1).map(direction => (items, direction))
-    )
-  }
-
   def next: Iterator[State] = {
-    steps
-      .map((items, direction) => move(items, floor + direction))
-      .flatten
+    val items = layout(floor)
+    (items.combinations(1) ++ items.combinations(2))
+      .flatMap(move => List(-1, 1).map(dir => (move, floor + dir)))
+      .filter((_, to) => 0 <= to && to < 4) // invalid floor
+      .map((items, to) => move(items, to))
+      .filter(_.isSafe)
   }
 
   override def toString(): String = {
@@ -71,8 +46,7 @@ class State(val floor: Int, val layout: Layout) {
 }
 
 object Solution {
-  val generator = """(\w+) generator""".r
-  val microchip = """(\w+)-compatible microchip""".r
+  val itemPattern = """(\w+)( generator|-compatible microchip)""".r
 
   def getNumSteps(initialState: State, verbose: Boolean): Int = {
     val explored = Set[Summarised](initialState.summarised)
@@ -107,14 +81,12 @@ object Solution {
 
     val verbose = args.length > 1
 
-    val layout = lines.map(floor => {
-      val generators =
-        generator.findAllMatchIn(floor).map(m => (m.group(1), "G"))
-      val microchips =
-        microchip.findAllMatchIn(floor).map(m => (m.group(1), "M"))
-
-      (generators ++ microchips).toList
-    })
+    val layout = lines.map(floor =>
+      itemPattern
+        .findAllMatchIn(floor)
+        .map(m => (m.group(1), if (m.group(2) == " generator") "G" else "M"))
+        .toList
+    )
 
     val initialState = State(0, layout)
     println(s"Part 1: ${getNumSteps(initialState, verbose)}")
@@ -123,11 +95,8 @@ object Solution {
       layout.updated(
         0,
         layout(0).appendedAll(
-          List(
-            ("elerium", "G"),
-            ("elerium", "M"),
-            ("dilithium", "M"),
-            ("dilithium", "G")
+          List("elerium", "dilithium").flatMap(elem =>
+            List("G", "M").map(t => (elem, t))
           )
         )
       )
