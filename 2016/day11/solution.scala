@@ -61,18 +61,31 @@ object Solution {
     Some(nextState)
   }
 
-  def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+  def getSteps(
+      singleItems: List[(String, String)]
+  ): List[(List[(String, String)], Int)] = {
+    // elevator can either take 1 or 2 items
+    val pairsOfItems = singleItems.combinations(2)
+    val combinations = singleItems.map(x => List(x)) ++ pairsOfItems
 
-    val initialState = lines.map(floor => {
-      val generators =
-        generator.findAllMatchIn(floor).map(m => (m.group(1), "G"))
-      val microchips =
-        microchip.findAllMatchIn(floor).map(m => (m.group(1), "M"))
+    combinations.flatMap(items =>
+      // elevator can either go up or down
+      List(-1, 1).map(direction => (items, direction))
+    )
+  }
 
-      (generators ++ microchips).toList
-    })
+  def getNextStates(state: State, floor: Int): List[(State, Int)] = {
+    getSteps(state(floor)).flatMap((items, direction) =>
+      val nextState = move(state, items, floor, floor + direction)
+      if (nextState.isDefined) {
+        List((nextState.get, floor + direction))
+      } else {
+        List.empty
+      }
+    )
+  }
 
+  def getNumSteps(initialState: State, verbose: Boolean): Int = {
     val elements = initialState.flatMap(floor => floor.map(_._1))
 
     val explored = Set[(SummarisedState, Int)]()
@@ -86,35 +99,54 @@ object Solution {
     while (queue.nonEmpty) {
       val (numSteps, state, floor) = queue.dequeue()
 
-      if (!timer.contains(numSteps)) {
+      if (verbose && !timer.contains(numSteps)) {
         timer(numSteps) = System.currentTimeMillis()
         println(s"$numSteps: ${timer(numSteps) - startTime} ms")
       }
 
       if (isGoal(elements, state)) {
-        println(s"Part 1: $numSteps")
-        return
+        return numSteps
       }
 
-      // elevator can either take 1 or 2 items
-      val singleItems = state(floor)
-      val pairsOfItems = singleItems.combinations(2)
-      val combinations = singleItems.map(x => List(x)) ++ pairsOfItems
-
-      // elevator can either go up or down
-      combinations.foreach(items => {
-        List(-1, 1).foreach(direction => {
-          val nextState = move(state, items, floor, floor + direction)
-
-          if (nextState.isDefined) {
-            val s = nextState.get
-            if (!explored.contains((summarise(s), floor + direction))) {
-              explored.add((summarise(s), floor + direction))
-              queue.enqueue((numSteps + 1, s, floor + direction))
-            }
-          }
-        })
+      getNextStates(state, floor).map((state, floor) => {
+        if (!explored.contains((summarise(state), floor))) {
+          explored.add((summarise(state), floor))
+          queue.enqueue((numSteps + 1, state, floor))
+        }
       })
     }
+
+    return -1
+  }
+
+  def main(args: Array[String]): Unit = {
+    val lines: List[String] = FileUtils.readFileContents(args(0))
+
+    val verbose = args.length > 1
+
+    val initialState = lines.map(floor => {
+      val generators =
+        generator.findAllMatchIn(floor).map(m => (m.group(1), "G"))
+      val microchips =
+        microchip.findAllMatchIn(floor).map(m => (m.group(1), "M"))
+
+      (generators ++ microchips).toList
+    })
+
+    println(s"Part 1: ${getNumSteps(initialState, verbose)}")
+
+    val updatedState =
+      initialState.updated(
+        0,
+        initialState(0).appendedAll(
+          List(
+            ("elerium", "G"),
+            ("elerium", "M"),
+            ("dilithium", "M"),
+            ("dilithium", "G")
+          )
+        )
+      )
+    println(s"Part 2: ${getNumSteps(updatedState, verbose)}")
   }
 }
