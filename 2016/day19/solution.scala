@@ -2,12 +2,12 @@ import util.FileUtils
 
 object Solution {
   def stealAdjacent(numElves: Int): Int = {
-    var n = numElves
+    var elves = List.range(1, numElves + 1)
     var r = 0
-    var elves = Stream.from(1, 1).take(n)
+    var n = numElves
 
     while (n > 1) {
-      elves = elves.zipWithIndex.filter((_, i) => i % 2 == r).map(_._1).force
+      elves = elves.zipWithIndex.filter((_, i) => i % 2 == r).map(_._1)
       r = (r + n) % 2
       n = elves.length
     }
@@ -16,27 +16,19 @@ object Solution {
   }
 
   def stealAcross(numElves: Int): Int = {
-    // index of the first victim
-    val firstVictim = numElves / 2
+    var firstVictim = numElves / 2
 
-    val firstSafe = if (numElves % 2 == 0) firstVictim + 2 else firstVictim + 1
-    var r = firstSafe % 3
-
-    var n = numElves
-    var elves = Stream
-      .from(1, 1)
-      .take(n)
-      .zipWithIndex
-      .filter((_, i) => i < firstVictim || i % 3 == r)
-      .map(_._1)
-      .force
-    r = (r - (n % 3) + 3) % 3
-    n = elves.length
+    var elves = List.range(1, numElves + 1)
+    var r = math.floorMod(2 - numElves, 3)
+    var n = elves.length
 
     while (n > 1) {
-      elves = elves.zipWithIndex.filter((_, i) => i % 3 == r).map(_._1).force
-      r = (r - (n % 3) + 3) % 3
+      elves = elves.zipWithIndex
+        .filter((_, i) => i < firstVictim || i % 3 == r)
+        .map(_._1)
+      r = math.floorMod(r - n, 3)
       n = elves.length
+      firstVictim = 0 // after the first round, no elf is safe
     }
 
     elves.head
@@ -50,6 +42,7 @@ object Solution {
     assert(stealAcross(5) == 2)
     assert(stealAcross(11) == 2)
     assert(stealAcross(12) == 3)
+    assert(stealAcross(13) == 4)
     println(s"Part 2: ${stealAcross(n)}")
   }
 }
