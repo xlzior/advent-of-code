@@ -2,6 +2,7 @@ package util
 
 class Pair(val x: Int, val y: Int) {
   def +(other: Pair): Pair = new Pair(x + other.x, y + other.y)
+  def -(other: Pair): Pair = new Pair(x - other.x, y - other.y)
   def *(factor: Int): Pair = new Pair(x * factor, y * factor)
   def %(other: Pair): Pair = new Pair(x % other.x, y % other.y)
   def <(other: Pair): Boolean = x < other.x && y < other.y
