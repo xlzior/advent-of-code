@@ -1,14 +1,21 @@
 import util.FileUtils
 
-class Hand(val cards: String, val counter: List[Int]) extends Ordered[Hand] {
+def toCounts(string: String): List[Int] = {
+  string.groupBy(identity).values.map(_.length).toList.sorted.reverse
+}
+
+def jokerify(string: String): String = {
+  val nonJokers = string.filter(_ != 'J').groupBy(identity).mapValues(_.length)
+  val mostCommon = if (nonJokers.nonEmpty) nonJokers.maxBy(_._2)._1 else '3'
+  string.replaceAll("J", mostCommon.toString())
+}
+
+class Hand(val cards: String, val counter: List[Int], val counter2: List[Int]) {
   def this(cards: String) = {
-    this(
-      cards,
-      cards.groupBy(identity).values.map(_.length).toList.sorted.reverse
-    )
+    this(cards, toCounts(cards), toCounts(jokerify(cards)))
   }
 
-  def typeValue: Int = {
+  def typeValue(counter: List[Int]): Int = {
     counter match {
       case List(5)             => 7
       case List(4, 1)          => 6
@@ -21,21 +28,33 @@ class Hand(val cards: String, val counter: List[Int]) extends Ordered[Hand] {
     }
   }
 
-  val cardValues =
-    List('A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2')
+  val cardValues = "AKQJT98765432".reverse
+  val cardValues2 = "AKQT98765432J".reverse
 
-  def cardValue = cards.map(c => 13 - cardValues.indexOf(c))
+  def cardValue = cards.map(c => cardValues.indexOf(c))
+  def cardValue2 = cards.map(c => cardValues2.indexOf(c))
 
-  def compare(that: Hand): Int = {
-    val typeCompare = (this.typeValue - that.typeValue)
-    val cardCompare = this.cardValue
-      .zip(that.cardValue)
-      .map((a, b) => a.compare(b))
-      .toList
-    (typeCompare :: cardCompare).dropWhile(_ == 0).headOption.getOrElse(0)
-  }
+  def value = (
+    typeValue(counter),
+    cardValue(0),
+    cardValue(1),
+    cardValue(2),
+    cardValue(3),
+    cardValue(4)
+  )
 
-  override def toString(): String = s"$typeValue $cards"
+  def value2 = (
+    typeValue(counter2),
+    cardValue2(0),
+    cardValue2(1),
+    cardValue2(2),
+    cardValue2(3),
+    cardValue2(4)
+  )
+}
+
+def countWinnings(sortedHands: List[(Hand, Int)]) = {
+  sortedHands.zipWithIndex.map((hand, b) => hand._2 * (b + 1)).sum
 }
 
 object Solution {
@@ -46,9 +65,10 @@ object Solution {
       case Array(cards, bid) => (Hand(cards), bid.toInt)
     })
 
-    val part1 =
-      hands.sorted.zipWithIndex.map((hand, b) => hand._2 * (b + 1)).sum
+    val part1 = countWinnings(hands.sortBy((hand, _) => hand.value))
+    val part2 = countWinnings(hands.sortBy((hand, _) => hand.value2))
 
     println(s"Part 1: $part1")
+    println(s"Part 2: $part2")
   }
 }
