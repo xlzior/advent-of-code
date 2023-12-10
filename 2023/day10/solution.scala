@@ -5,6 +5,34 @@ import scala.collection.mutable.Map
 import util.FileUtils
 import util.Pair
 
+object PrintUtils {
+  val bdc =
+    Map('|' -> '│', '-' -> '─', 'L' -> '└', 'J' -> '┘', '7' -> '┐', 'F' -> '┌')
+      .withDefault(c => c)
+
+  def printPipes(pipes: Map[Pair, Char], dimensions: Pair) = {
+    (0 until dimensions.y).foreach(y => {
+      (0 until dimensions.x).foreach(x => {
+        print(bdc(pipes.getOrElse(Pair(x, y), '.')))
+      })
+      println()
+    })
+    println()
+  }
+
+  def printMap(pipes: Map[Pair, Char], dimensions: Pair, outside: Set[Pair]) = {
+    (0 until dimensions.y).foreach(y => {
+      (0 until dimensions.x).foreach(x => {
+        val xy = Pair(x, y)
+        print(bdc(pipes.getOrElse(xy, if (outside.contains(xy)) 'O' else 'I')))
+      })
+      println()
+    })
+
+    println()
+  }
+}
+
 object Solution {
   val north = Pair(0, -1)
   val south = Pair(0, 1)
@@ -120,14 +148,20 @@ object Solution {
 
   def main(args: Array[String]): Unit = {
     val grid: List[String] = FileUtils.readFileContents(args(0))
-    val H = 2 * grid.length + 1
-    val W = 2 * grid(0).length + 1
+    val h = grid.length
+    val w = grid(0).length
+    val H = 2 * h + 1
+    val W = 2 * w + 1
 
     val pipes = findLoop(grid)
     val expanded = expand(pipes)
     val all = gridCoordinates(Pair(0, 0), Pair(W, H)).toSet
     val outside = floodfill(expanded, Pair(0, 0), Pair(W, H))
     val inside = (all -- outside -- expanded.keySet).filter(preExpansion)
+
+    PrintUtils.printPipes(pipes, Pair(w, h))
+    PrintUtils.printPipes(expanded, Pair(W, H))
+    PrintUtils.printMap(expanded, Pair(W, H), outside)
 
     println(s"Part 1: ${pipes.size / 2}")
     println(s"Part 2: ${inside.size}")
