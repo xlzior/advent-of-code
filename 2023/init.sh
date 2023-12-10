@@ -5,6 +5,6 @@ mkdir -p day$day
 
 cd day$day
 
-touch puzzle.txt sample.txt
+touch 1.in 1.out puzzle.in
 
 cp ../template.scala solution.scala

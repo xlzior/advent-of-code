@@ -3,6 +3,8 @@
 
 # AoC
 puzzle.txt
+puzzle.in
+puzzle.out
 
 # editors
 .vscode/

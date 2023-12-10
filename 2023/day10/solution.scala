@@ -4,6 +4,7 @@ import scala.collection.mutable.Map
 
 import util.FileUtils
 import util.Pair
+import util.Solution
 
 object PrintUtils {
   val bdc =
@@ -33,7 +34,7 @@ object PrintUtils {
   }
 }
 
-object Solution {
+object Day10 extends Solution {
   val north = Pair(0, -1)
   val south = Pair(0, 1)
   val east = Pair(1, 0)
@@ -146,8 +147,7 @@ object Solution {
 
   def preExpansion(p: Pair): Boolean = p.y % 2 == 1 && p.x % 2 == 1
 
-  def main(args: Array[String]): Unit = {
-    val grid: List[String] = FileUtils.readFileContents(args(0))
+  def solve(grid: List[String]): (Int, Int) = {
     val h = grid.length
     val w = grid(0).length
     val H = 2 * h + 1
@@ -159,11 +159,19 @@ object Solution {
     val outside = floodfill(expanded, Pair(0, 0), Pair(W, H))
     val inside = (all -- outside -- expanded.keySet).filter(preExpansion)
 
-    PrintUtils.printPipes(pipes, Pair(w, h))
-    PrintUtils.printPipes(expanded, Pair(W, H))
-    PrintUtils.printMap(expanded, Pair(W, H), outside)
+    // PrintUtils.printPipes(pipes, Pair(w, h))
+    // PrintUtils.printPipes(expanded, Pair(W, H))
+    // PrintUtils.printMap(expanded, Pair(W, H), outside)
 
-    println(s"Part 1: ${pipes.size / 2}")
-    println(s"Part 2: ${inside.size}")
+    (pipes.size / 2, inside.size)
+  }
+
+  def main(args: Array[String]): Unit = {
+    assert(testsPass)
+
+    val lines: List[String] = FileUtils.read("puzzle.in")
+    val (part1, part2) = solve(lines)
+    println(s"Part 1: $part1")
+    println(s"Part 2: $part2")
   }
 }
