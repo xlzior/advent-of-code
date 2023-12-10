@@ -17,7 +17,7 @@ object Day extends Solution {
   def main(args: Array[String]): Unit = {
     assert(testsPass)
 
-    val lines: List[String] = FileUtils.read("puzzle.in")
+    val lines: List[String] = FileUtils.read(s"${args(0)}.in")
     val (part1, part2) = solve(lines)
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
