@@ -13,17 +13,6 @@ object Solution {
 
   val deltas = List(north, south, east, west)
 
-  val bdc =
-    Map(
-      '|' -> '│',
-      '-' -> '─',
-      'L' -> '└',
-      'J' -> '┘',
-      '7' -> '┐',
-      'F' -> '┌',
-      '.' -> '.'
-    )
-
   val next = Map(
     '|' -> Map(north -> north, south -> south),
     '-' -> Map(east -> east, west -> west),
@@ -37,120 +26,110 @@ object Solution {
     val h = grid.length
     val w = grid(0).length
 
-    if (Pair(0, 0) <= p && p < Pair(w, h)) {
-      grid(p.y)(p.x)
-    } else {
-      '.'
-    }
+    if (Pair(0, 0) <= p && p < Pair(w, h)) grid(p.y)(p.x)
+    else '.'
   }
 
-  def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
-
-    val h = lines.length
-    val w = lines(0).length
-
-    val start =
-      lines.zipWithIndex
-        .flatMap((line, y) => {
-          val x = line.indexOf("S")
-          if (x >= 0) List(Pair(x, y)) else List.empty
-        })(0)
+  def getStart(grid: List[String]): (Pair, Char) = {
+    val start = grid.zipWithIndex
+      .flatMap((line, y) => {
+        val x = line.indexOf("S")
+        if (x >= 0) List(Pair(x, y)) else List.empty
+      })(0)
 
     val surroundings =
-      List(north, east, south, west).map(_ + start).map(p => get(lines, p))
+      List(north, east, south, west).map(_ + start).map(p => get(grid, p))
 
-    val startPipe = surroundings match {
+    val pipe = surroundings match {
       case List(_, '-', '|', _) => 'F'
       case List(_, 'J', '|', _) => 'F'
       case List('7', '7', _, _) => 'L'
       case List(_, _, '|', 'F') => '7'
       case List(_, '7', 'J', _) => 'F'
+      case _                    => '.'
     }
 
-    val startDirections = next(startPipe).values.toList
-    var left = start
-    var right = start
-    var leftDir = startDirections(0)
-    var rightDir = startDirections(1)
-    var numSteps = 0
-    val pipes = Map[Pair, Char](start -> startPipe)
+    (start, pipe)
+  }
 
-    while (numSteps == 0 || left != right) {
-      left = left + leftDir
-      leftDir = next(get(lines, left))(leftDir)
-      pipes(left) = get(lines, left)
+  def findLoop(grid: List[String]): Map[Pair, Char] = {
+    val (start, pipe) = getStart(grid)
+    var ghosts = next(pipe).values.map(dir => (start, dir))
+    var pipes = Map[Pair, Char](start -> pipe)
 
-      right = right + rightDir
-      rightDir = next(get(lines, right))(rightDir)
-      pipes(right) = get(lines, right)
-
-      numSteps += 1
+    while (pipes.size == 1 || ghosts.map(_._1).toSet.size > 1) {
+      ghosts = ghosts.map((pos, dir) => {
+        val pipe = get(grid, pos + dir)
+        pipes(pos + dir) = pipe
+        (pos + dir, next(pipe)(dir))
+      })
     }
 
-    println(s"Part 1: $numSteps")
+    pipes
+  }
 
-    val withoutJunk = lines.zipWithIndex.map((line, y) =>
-      line.zipWithIndex
-        .map((char, x) => if (pipes.contains(Pair(x, y))) char else '.')
-        .mkString
-    )
+  val eastWest = Set('-', 'F', 'L')
+  val northSouth = Set('|', 'F', '7')
 
-    val eastWest = Set('-', 'F', 'L')
-    val northSouth = Set('|', 'F', '7')
-
+  def expand(pipes: Map[Pair, Char]): Map[Pair, Char] = {
     val expanded = pipes.map((coords, pipe) => (coords * 2, pipe)).toMap
-    val connected = expanded.foldLeft(expanded)((acc, curr) => {
-      val (coords, pipe) = curr
-      var result = acc
-      if (eastWest.contains(pipe)) result = result.updated(coords + east, '-')
-      if (northSouth.contains(pipe))
-        result = result.updated(coords + south, '|')
-      result
-    })
-    val padded =
-      connected.map((coords, pipe) => (coords + Pair(1, 1), pipe)).toMap
 
-    // println((expanded.size, connected.size, padded.size))
-
-    val display = bdc.foldLeft(withoutJunk.mkString("\n"))((acc, chars) =>
-      acc.replace(chars._1, chars._2)
+    Map[Pair, Char](
+      expanded
+        .foldLeft(expanded)((acc, curr) => {
+          val (coords, pipe) = curr
+          var result = acc
+          if (eastWest.contains(pipe))
+            result = result.updated(coords + east, '-')
+          if (northSouth.contains(pipe))
+            result = result.updated(coords + south, '|')
+          result
+        })
+        .map((coords, pipe) => (coords + Pair(1, 1), pipe))
+        .toSeq: _*
     )
+  }
 
-    // println(display)
+  def floodfill(pipes: Map[Pair, Char], start: Pair, size: Pair): Set[Pair] = {
+    val outside = Set[Pair](start)
+    val queue = Queue[Pair](start)
 
-    // (0 to 2 * h + 1).foreach(y => {
-    //   (0 to 2 * w + 1).foreach(x => {
-    //     print(bdc(padded.getOrElse(Pair(x, y), '.')))
-    //   })
-    //   println()
-    // })
-
-    val outside = Set[Pair](Pair(0, 0))
-    val queue = Queue[Pair](Pair(0, 0))
     while (queue.nonEmpty) {
       val curr = queue.dequeue()
 
       deltas
         .map(delta => delta + curr)
-        .filter(next => Pair(0, 0) <= next && next < Pair(2 * w + 1, 2 * h + 1))
+        .filter(next => Pair(0, 0) <= next && next < size)
         .foreach(next => {
-          if (padded.getOrElse(next, '.') == '.' && !outside.contains(next)) {
+          if (!pipes.contains(next) && !outside.contains(next)) {
             queue.enqueue(next)
             outside.add(next)
           }
         })
     }
 
-    val all = (0 until 2 * h + 1)
-      .flatMap(y => (0 until 2 * w + 1).map(x => Pair(x, y)))
-      .toSet
-    val inside = all -- outside.toSet -- padded.keySet
+    outside
+  }
 
-    // println(inside.size)
+  def gridCoordinates(start: Pair, end: Pair): IndexedSeq[Pair] =
+    (start.x until end.x).flatMap(x =>
+      (start.y until end.y).map(y => Pair(x, y))
+    )
 
-    val insideFiltered = inside.filter(p => p.y % 2 == 1 && p.x % 2 == 1)
+  def preExpansion(p: Pair): Boolean = p.y % 2 == 1 && p.x % 2 == 1
 
-    println(insideFiltered.size)
+  def main(args: Array[String]): Unit = {
+    val grid: List[String] = FileUtils.readFileContents(args(0))
+    val H = 2 * grid.length + 1
+    val W = 2 * grid(0).length + 1
+
+    val pipes = findLoop(grid)
+    val expanded = expand(pipes)
+    val all = gridCoordinates(Pair(0, 0), Pair(W, H)).toSet
+    val outside = floodfill(expanded, Pair(0, 0), Pair(W, H))
+    val inside = (all -- outside -- expanded.keySet).filter(preExpansion)
+
+    println(s"Part 1: ${pipes.size / 2}")
+    println(s"Part 2: ${inside.size}")
   }
 }
