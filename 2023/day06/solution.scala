@@ -11,7 +11,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
 
     // Part 1
     val parsed = lines.map(s => """(\d+)""".r.findAllIn(s).map(_.toLong))

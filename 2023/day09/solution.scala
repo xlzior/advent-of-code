@@ -12,7 +12,7 @@ def predict(line: List[Int]): Int = {
 
 object Solution {
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
     val histories = lines.map(_.split(" ").map(_.toInt).toList)
 
     val part1 = histories.map(predict).sum

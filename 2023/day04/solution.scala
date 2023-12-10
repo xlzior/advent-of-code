@@ -38,7 +38,7 @@ object Solution {
     }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
     val cards = parse(lines)
 
     val part1 = cards.map(n => if (n == 0) 0 else math.pow(2, n - 1)).sum.toInt

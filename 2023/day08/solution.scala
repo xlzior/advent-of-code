@@ -38,7 +38,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
     val instructions = lines(0).map(c => if (c == 'L') 0 else 1).toList
     val graph =
       lines

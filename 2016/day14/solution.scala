@@ -56,7 +56,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val salt: String = FileUtils.readFileContents(args(0))(0)
+    val salt: String = FileUtils.read(args(0))(0)
 
     var id = 0
     var numKeys = 0

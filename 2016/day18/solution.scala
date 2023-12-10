@@ -21,7 +21,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val row: String = FileUtils.readFileContents(args(0))(0)
+    val row: String = FileUtils.read(args(0))(0)
 
     assert(countSafe(".^^.^.^^^^", 10) == 38)
 

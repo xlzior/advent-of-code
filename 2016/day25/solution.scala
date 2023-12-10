@@ -35,7 +35,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
 
     val n = 12 // output has a periodicity of 12
     val target = "01".repeat(n / 2)

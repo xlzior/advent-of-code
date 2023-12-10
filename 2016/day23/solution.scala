@@ -51,7 +51,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
 
     val part1 =
       run(lines, Map[String, Int]("a" -> 7, "b" -> 0, "c" -> 0, "d" -> 0))

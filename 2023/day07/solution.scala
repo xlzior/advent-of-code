@@ -50,7 +50,7 @@ def countWinnings(sortedHands: List[(String, Int)]) = {
 
 object Solution {
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
     val hands = lines.map(_.split(' ') match {
       case Array(cards, bid) => (cards, bid.toInt)
     })

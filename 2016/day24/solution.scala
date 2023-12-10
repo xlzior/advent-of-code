@@ -43,7 +43,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val grid: List[String] = FileUtils.readFileContents(args(0))
+    val grid: List[String] = FileUtils.read(args(0))
 
     val pois = grid.zipWithIndex
       .flatMap((line, y) =>

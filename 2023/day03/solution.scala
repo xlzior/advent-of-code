@@ -9,7 +9,7 @@ object Solution {
   val deltas = (-1 to 1).flatMap(x => (-1 to 1).map(y => Pair(x, y)))
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
 
     val timer = Timer()
     timer.checkpoint()

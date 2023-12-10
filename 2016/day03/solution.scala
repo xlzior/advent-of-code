@@ -7,7 +7,7 @@ object Solution {
 
   def main(args: Array[String]): Unit = {
     val lines = FileUtils
-      .readFileContents(args(0))
+      .read(args(0))
       .map(_.trim().split("\\s+").map(_.toInt))
 
     val part1 = lines

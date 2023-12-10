@@ -48,7 +48,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val id = FileUtils.readFileContents(args(0))(0)
+    val id = FileUtils.read(args(0))(0)
 
     args(1) match {
       case "1" => println(s"Part 1: ${part1(id)}")

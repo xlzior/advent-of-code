@@ -6,7 +6,7 @@ object Solution {
     Array(new Pair(0, 1), new Pair(1, 0), new Pair(0, -1), new Pair(-1, 0))
 
   def main(args: Array[String]): Unit = {
-    val lines = FileUtils.readFileContents(args(0))
+    val lines = FileUtils.read(args(0))
 
     var part2Done = false
 

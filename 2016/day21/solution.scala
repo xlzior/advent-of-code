@@ -57,7 +57,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
     val first = lines(0)
     val second = lines(1)
     val instructions = lines.tail.tail

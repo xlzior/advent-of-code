@@ -47,7 +47,7 @@ object Solution {
       .sum
 
   def main(args: Array[String]): Unit = {
-    val lines = FileUtils.readFileContents(args(0))
+    val lines = FileUtils.read(args(0))
 
     args(1) match {
       case "1" => println(s"Part 1: ${part1(lines)}")

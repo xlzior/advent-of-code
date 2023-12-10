@@ -35,7 +35,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val n: Int = FileUtils.readFileContents(args(0))(0).toInt
+    val n: Int = FileUtils.read(args(0))(0).toInt
 
     println(s"Part 1: ${stealAdjacent(n)}")
 

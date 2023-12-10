@@ -28,7 +28,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines = FileUtils.readFileContents(args(0))
+    val lines = FileUtils.read(args(0))
 
     println(s"Part 1: ${lines.count(supportsTLS)}")
     println(s"Part 2: ${lines.count(supportsSSL)}")

@@ -48,7 +48,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val puzzle: String = FileUtils.readFileContents(args(0))(0)
+    val puzzle: String = FileUtils.read(args(0))(0)
 
     assert(version1("ADVENT") == 6)
     assert(version1("A(1x5)BC") == 7)

@@ -3,7 +3,7 @@ package util
 import scala.io.Source
 
 object FileUtils {
-  def readFileContents(fileName: String): List[String] = {
+  def read(fileName: String): List[String] = {
     try {
       val source = Source.fromFile(fileName)
       val lines = source.getLines().toList

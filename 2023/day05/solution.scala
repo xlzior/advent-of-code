@@ -71,7 +71,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
     val (seeds, maps) = parse(lines)
 
     println(s"Part 1: ${seeds.map(toLocation(maps)).min}")

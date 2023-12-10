@@ -7,7 +7,7 @@ object Solution {
   val rotateRow = """rotate row y=(\d+) by (\d+)""".r
 
   def main(args: Array[String]): Unit = {
-    val lines: List[String] = FileUtils.readFileContents(args(0))
+    val lines: List[String] = FileUtils.read(args(0))
 
     val screenSize = if (args(0) == "sample.txt") Pair(7, 3) else Pair(50, 6)
 

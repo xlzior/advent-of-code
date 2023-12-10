@@ -59,7 +59,7 @@ class DiamondKeypad() extends Keypad {
 
 object Solution {
   def main(args: Array[String]): Unit = {
-    val lines = FileUtils.readFileContents(args(0))
+    val lines = FileUtils.read(args(0))
 
     val squareKeypad = new SquareKeypad()
     val diamondKeypad = new DiamondKeypad()

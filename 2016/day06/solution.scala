@@ -3,7 +3,7 @@ import util.FileUtils
 object Solution {
   def main(args: Array[String]): Unit = {
     val letters = FileUtils
-      .readFileContents(args(0))
+      .read(args(0))
       .transpose
       .map(
         _.groupBy(identity)

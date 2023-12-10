@@ -28,7 +28,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val lines = FileUtils.readFileContents(args(0))
+    val lines = FileUtils.read(args(0))
 
     val roomPattern = """([a-z-]+)-(\d+)\[(\w+)\]""".r
     val part1 = lines.map {

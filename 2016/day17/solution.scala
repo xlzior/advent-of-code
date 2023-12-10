@@ -71,7 +71,7 @@ object Solution {
   }
 
   def main(args: Array[String]): Unit = {
-    val puzzle: String = FileUtils.readFileContents(args(0))(0)
+    val puzzle: String = FileUtils.read(args(0))(0)
 
     assert(explore("ihgpwlah") == ("DDRRRD", 370))
     assert(explore("kglvqrro") == ("DDUDRLRRUDRD", 492))
