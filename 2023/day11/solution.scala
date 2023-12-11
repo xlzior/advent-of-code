@@ -11,10 +11,7 @@ object Day extends Solution {
     val emptyCols = emptyLines(lines.transpose.map(_.mkString))
 
     val galaxies = lines.zipWithIndex.flatMap((row, r) =>
-      row.zipWithIndex.flatMap((char, c) => {
-        if (char == '#') List(Pair(r, c))
-        else List.empty
-      })
+      row.zipWithIndex.collect { case ('#', c) => Pair(r, c) }
     )
 
     galaxies
@@ -28,6 +25,7 @@ object Day extends Solution {
           val extraCols = emptyCols.count(y => minY < y && y < maxY).toLong
           basic + extraRows * (n - 1) + extraCols * (n - 1)
         }
+        case _ => 0
       }
       .sum
   }
