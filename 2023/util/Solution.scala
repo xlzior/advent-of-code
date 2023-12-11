@@ -3,7 +3,7 @@ package util
 import util.FileUtils
 
 trait Solution {
-  def solve(lines: List[String]): (Any, Any)
+  def solve(lines: List[String]): List[Any]
 
   def main(args: Array[String]): Unit
 
@@ -11,7 +11,7 @@ trait Solution {
     FileUtils.testFiles
       .map(filename => {
         val lines: List[String] = FileUtils.read(s"$filename.in")
-        val solution = solve(lines).toList.map(_.toString)
+        val solution = solve(lines).map(_.toString)
         val expected: List[String] = FileUtils.read(s"$filename.out")
 
         val checks = solution.zip(expected).map((o, e) => e == "*" || o == e)
@@ -28,8 +28,8 @@ trait Solution {
                 s"Part ${i + 1}: ${solution(i)} (expected: ${expected(i)})    "
               )
             )
+          println()
         }
-        println()
         isCorrect
       })
       .forall(identity)

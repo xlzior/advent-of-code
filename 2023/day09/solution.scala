@@ -12,20 +12,20 @@ def predict(line: List[Int]): Int = {
 }
 
 object Day9 extends Solution {
-  def solve(lines: List[String]): (Int, Int) = {
+  def solve(lines: List[String]): List[Int] = {
     val histories = lines.map(_.split(" ").map(_.toInt).toList)
 
     val part1 = histories.map(predict).sum
     val part2 = histories.map(_.reverse).map(predict).sum
-    (part1, part2)
+    List(part1, part2)
   }
 
   def main(args: Array[String]): Unit = {
     assert(testsPass)
 
     val lines: List[String] = FileUtils.read(s"${args(0)}.in")
-    val (part1, part2) = solve(lines)
-    println(s"Part 1: $part1")
-    println(s"Part 2: $part2")
+    val solution = solve(lines)
+    println(s"Part 1: ${solution.head}")
+    println(s"Part 2: ${solution.last}")
   }
 }

@@ -147,7 +147,7 @@ object Day10 extends Solution {
 
   def preExpansion(p: Pair): Boolean = p.y % 2 == 1 && p.x % 2 == 1
 
-  def solve(grid: List[String]): (Int, Int) = {
+  def solve(grid: List[String]): List[Int] = {
     val h = grid.length
     val w = grid(0).length
     val H = 2 * h + 1
@@ -163,15 +163,15 @@ object Day10 extends Solution {
     // PrintUtils.printPipes(expanded, Pair(W, H))
     // PrintUtils.printMap(expanded, Pair(W, H), outside)
 
-    (pipes.size / 2, inside.size)
+    List(pipes.size / 2, inside.size)
   }
 
   def main(args: Array[String]): Unit = {
     assert(testsPass)
 
     val lines: List[String] = FileUtils.read(s"${args(0)}.in")
-    val (part1, part2) = solve(lines)
-    println(s"Part 1: $part1")
-    println(s"Part 2: $part2")
+    val solution = solve(lines)
+    println(s"Part 1: ${solution.head}")
+    println(s"Part 2: ${solution.last}")
   }
 }
