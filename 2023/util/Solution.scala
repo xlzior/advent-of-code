@@ -14,9 +14,22 @@ trait Solution {
         val solution = solve(lines).toList.map(_.toString)
         val expected: List[String] = FileUtils.read(s"$filename.out")
 
-        val isCorrect =
-          solution.zip(expected).forall((o, e) => e == "*" || o == e)
-        println(s"$filename ${if (isCorrect) "✅" else "❌"}")
+        val checks = solution.zip(expected).map((o, e) => e == "*" || o == e)
+        val isCorrect = checks.forall(identity)
+
+        if (isCorrect) {
+          println(s"$filename ✅")
+        } else {
+          print(s"$filename ❌    ")
+          checks.zipWithIndex
+            .filter(!_._1)
+            .foreach((_, i) =>
+              print(
+                s"Part ${i + 1}: ${solution(i)} (expected: ${expected(i)})    "
+              )
+            )
+        }
+        println()
         isCorrect
       })
       .forall(identity)
