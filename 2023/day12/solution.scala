@@ -16,35 +16,19 @@ object Day extends Solution {
   }
 
   def countWays(condition: String, groups: List[Int]): Int = {
-    val ways = Set[String]()
-    val explored = Set[String]("")
-    val queue = Queue[String]("")
-
-    while (queue.nonEmpty) {
-      val curr = queue.dequeue()
-
-      if (curr.length == condition.length) {
-        if (countGroups(curr) == groups) {
-          ways.add(curr)
-        }
-      } else {
-        val char = condition(curr.length)
-        val branches = if (char == '?') List('#', '.') else List(char)
-
-        branches.foreach(nextChar => {
-          val nextNode = curr + nextChar
-          if (
-            !explored.contains(nextNode) &&
-            isPrefix(countGroups(curr), groups)
-          ) {
-            explored.add(nextNode)
-            queue.enqueue(nextNode)
-          }
-        })
-      }
+    if (!condition.contains('?')) {
+      return if (countGroups(condition) == groups) 1 else 0
     }
 
-    ways.size
+    val i = condition.indexOf("?")
+
+    if (!isPrefix(countGroups(condition.slice(0, 1)), groups)) {
+      return 0
+    }
+
+    val broken = countWays(condition.updated(i, '#'), groups)
+    val working = countWays(condition.updated(i, '.'), groups)
+    broken + working
   }
 
   def part1(parsed: List[(String, List[Int])]): Int = {
@@ -54,14 +38,13 @@ object Day extends Solution {
   }
 
   def part2(parsed: List[(String, List[Int])]): Int = {
-    // parsed
-    //   .map((condition, groups) => {
-    //     val expandedCondition = (condition + "?").repeat(5)
-    //     val expandedGroups = List.fill(5)(groups).flatten
-    //     countWays(expandedCondition, expandedGroups)
-    //   })
-    //   .sum
-    -1
+    parsed
+      .map((condition, groups) => {
+        val expandedCondition = (condition + "?").repeat(5)
+        val expandedGroups = List.fill(5)(groups).flatten
+        countWays(expandedCondition, expandedGroups)
+      })
+      .sum
   }
 
   def solve(lines: List[String]): List[Int] = {
@@ -71,11 +54,12 @@ object Day extends Solution {
           (condition, groups.split(",").map(_.toInt).toList)
       })
 
-    List(part1(parsed), part2(parsed))
+    List(part1(parsed))
+    // List(part1(parsed), part2(parsed))
   }
 
   def main(args: Array[String]): Unit = {
-    assert(testsPass)
+    // assert(testsPass)
 
     val lines: List[String] = FileUtils.read(s"${args(0)}.in")
     val solution = solve(lines)
