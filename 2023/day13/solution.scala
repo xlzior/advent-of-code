@@ -2,48 +2,40 @@ import util.Solution
 import util.FileUtils
 
 object Day extends Solution {
-  def isReflection(left: String, right: String): Boolean = {
-    left.reverse.zip(right).forall((a, b) => a == b)
+  def countSmudges(left: String, right: String): Int = {
+    left.reverse.zip(right).count((a, b) => a != b)
   }
 
-  def findVerticalMirror(pattern: Array[String]): Int = {
-    val result = pattern
+  def findVertical(smudges: Int)(pattern: Array[String]): Int =
+    pattern
       .map(line =>
-        (1 until line.length)
-          .filter(i =>
-            isReflection(line.slice(0, i), line.slice(i, line.length))
-          )
-          .toSet
+        (1 until line.length).map(i =>
+          countSmudges(line.slice(0, i), line.slice(i, line.length))
+        )
       )
-      .foldLeft(Set.from(1 until pattern(0).length))((acc, curr) => acc & curr)
+      .toList
+      .transpose
+      .map(_.sum)
+      .indexOf(smudges) + 1
 
-    result.toList match {
-      case List(item) => return item
-      case Nil        => return -1
-    }
-  }
+  def findHorizontal(smudges: Int)(pattern: Array[String]): Int =
+    findVertical(smudges)(
+      pattern.map(_.split("")).transpose.map(_.mkString)
+    )
 
-  def findHorizontalMirror(pattern: Array[String]): Int = {
-    findVerticalMirror(pattern.map(_.split("")).transpose.map(_.mkString))
-  }
-
-  def part1(patterns: Array[Array[String]]): Int = {
-    val horizontal = patterns.map(findHorizontalMirror).filter(_ > 0).sum
-    val vertical = patterns.map(findVerticalMirror).filter(_ > 0).sum
+  def summariseMirrors(patterns: Array[Array[String]], smudges: Int): Int = {
+    val horizontal = patterns.map(findHorizontal(smudges)).filter(_ > 0).sum
+    val vertical = patterns.map(findVertical(smudges)).filter(_ > 0).sum
     horizontal * 100 + vertical
-  }
-
-  def part2(patterns: Array[Array[String]]): Int = {
-    -1
   }
 
   def solve(lines: List[String]): List[Int] = {
     val patterns = lines.mkString("\n").split("\n\n").map(_.split("\n"))
-    List(part1(patterns), part2(patterns))
+    List(summariseMirrors(patterns, 0), summariseMirrors(patterns, 1))
   }
 
   def main(args: Array[String]): Unit = {
-    // assert(testsPass)
+    assert(testsPass)
 
     val lines: List[String] = FileUtils.read(s"${args(0)}.in")
     val solution = solve(lines)
