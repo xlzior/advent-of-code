@@ -3,90 +3,60 @@ import util.FileUtils
 import util.Pair
 
 object Day extends Solution {
-  var n = 1_000_000_000
-  var dimensions = Pair(0, 0)
-  var cubes = Set[Pair]()
-  val directions = List(Pair(1, 0), Pair(0, -1), Pair(-1, 0), Pair(0, 1))
-
-  def roll(spheres: List[Pair], direction: Pair): List[Pair] = {
-    var newSpheres = List[Pair]()
-
-    spheres
-      .sortBy(p => -(p.x * direction.x + p.y * direction.y))
-      .foreach(sphere => {
-        var pos = sphere
-        var nextPos = pos + direction
-        while (
-          Pair(1, 1) <= nextPos && nextPos <= dimensions &&
-          !cubes.contains(nextPos) &&
-          !newSpheres.contains(nextPos)
-        ) {
-          pos = nextPos
-          nextPos = pos + direction
-        }
-        newSpheres = pos :: newSpheres
-      })
-
-    newSpheres
+  def rollLeft(column: String): String = {
+    val updated = column.replace(".O", "O.")
+    if (updated == column) column else rollLeft(updated)
   }
 
-  def calculateLoad(spheres: Iterable[Pair]): Int =
-    spheres.map(p => p.x).sum
+  def rotateAntiClockwise(grid: List[String]): List[String] =
+    grid.map(_.reverse).transpose.map(_.mkString)
 
-  def part1(spheres: List[Pair]): Int = {
-    val rolledSpheres = roll(spheres, directions(0))
-    calculateLoad(rolledSpheres)
+  def rotateClockwise(grid: List[String]): List[String] =
+    grid.transpose.map(_.mkString.reverse)
+
+  def calculateLoad(grid: List[String]): Int =
+    grid
+      .map(column =>
+        column.zipWithIndex
+          .map((c, i) => if (c == 'O') column.length - i else 0)
+          .sum
+      )
+      .sum
+
+  def part1(grid: List[String]): Int = {
+    val rolled = grid.map(rollLeft)
+    calculateLoad(rolled)
   }
 
-  def cycle(spheres: List[Pair]): List[Pair] = {
-    var rolledSpheres = spheres
-    for (direction <- directions) {
-      rolledSpheres = roll(rolledSpheres, direction)
-    }
-    rolledSpheres
-  }
+  def part2(grid: List[String]): Int = {
+    val n = 1_000_000_000
+    var target = n
+    var rolled = grid
+    var seen = Map[List[String], Int](grid -> 0)
 
-  def part2(spheres: List[Pair]): Int = {
-    var seen = Map[List[Pair], Int](spheres -> 0)
-    var rolledSpheres = spheres
-    for (i <- 1 to n) {
-      if (i % 1000_000 == 0) println(s"${i / n * 100}%")
-      for (direction <- directions) {
-        rolledSpheres = roll(rolledSpheres, direction)
+    var i = 0
+    while (i < target) {
+      i += 1
+      for (_ <- 1 to 4) {
+        rolled = rotateClockwise(rolled.map(rollLeft))
       }
-      if (seen.contains(rolledSpheres)) {
-        println(
-          s"state $i has been seen before in state ${seen(rolledSpheres)}"
-        )
-        val cycle = i - seen(rolledSpheres)
+      if (seen.contains(rolled)) {
+        val cycle = i - seen(rolled)
         val offset = (n - i) % cycle
-        println((cycle, offset))
-        return 0
+        target = i + offset
       }
-      seen = seen.updated(rolledSpheres, i)
+      seen = seen.updated(rolled, i)
     }
-    calculateLoad(rolledSpheres)
-  }
-
-  def getCoordinates(lines: List[String], symbol: Char): Iterable[Pair] = {
-    val h = lines.length
-    lines.zipWithIndex.flatMap((row, r) =>
-      row.zipWithIndex.collect {
-        case (char, c) if char == symbol => Pair(h - r, c + 1)
-      }
-    )
+    calculateLoad(rolled)
   }
 
   def solve(lines: List[String]): List[Int] = {
-    dimensions = Pair(lines.length, lines(0).length)
-    cubes = getCoordinates(lines, '#').toSet
-    val spheres = getCoordinates(lines, 'O').toList
-
-    List(part1(spheres), part2(spheres))
+    val grid = rotateAntiClockwise(lines)
+    List(part1(grid), part2(grid))
   }
 
   def main(args: Array[String]): Unit = {
-    // assert(testsPass)
+    assert(testsPass)
 
     val lines: List[String] = FileUtils.read(s"${args(0)}.in")
     val solution = solve(lines)
