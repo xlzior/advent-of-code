@@ -1,6 +1,8 @@
 package util
 
 class Pair(val x: Int, val y: Int) {
+  val r = x
+  val c = y
   def +(other: Pair): Pair = Pair(x + other.x, y + other.y)
   def -(other: Pair): Pair = Pair(x - other.x, y - other.y)
   def *(factor: Int): Pair = Pair(x * factor, y * factor)
