@@ -10,14 +10,14 @@ object Day extends Solution {
   val down = Pair(1, 0)
   val left = Pair(0, -1)
   val right = Pair(0, 1)
+  val sameDirection = (pair: Pair) => List(pair)
 
   val next = Map(
-    '.' -> Map(
-      up -> List(up),
-      left -> List(left),
-      down -> List(down),
-      right -> List(right)
-    ),
+    '.' -> Map[Pair, List[Pair]]().withDefault(sameDirection),
+    '-' -> Map(up -> List(left, right), down -> List(left, right))
+      .withDefault(sameDirection),
+    '|' -> Map(left -> List(up, down), right -> List(up, down))
+      .withDefault(sameDirection),
     '/' -> Map(
       up -> List(right),
       right -> List(up),
@@ -29,27 +29,13 @@ object Day extends Solution {
       left -> List(up),
       down -> List(right),
       right -> List(down)
-    ),
-    '-' -> Map(
-      right -> List(right),
-      left -> List(left),
-      up -> List(left, right),
-      down -> List(left, right)
-    ),
-    '|' -> Map(
-      up -> List(up),
-      down -> List(down),
-      left -> List(up, down),
-      right -> List(up, down)
     )
   )
 
-  def part1(lines: List[String]): Int = {
+  def energise(lines: List[String])(pos: Pair, dir: Pair): Int = {
     val h = lines.length
     val w = lines(0).length()
 
-    val pos = Pair(0, 0)
-    val dir = Pair(0, 1)
     val start = (pos, dir)
     val explored = Set[(Pair, Pair)](start)
     val queue = Queue[(Pair, Pair)](start)
@@ -72,8 +58,22 @@ object Day extends Solution {
     explored.map(_._1).toSet.size
   }
 
+  def part1(lines: List[String]): Int = {
+    energise(lines)(Pair(0, 0), right)
+  }
+
   def part2(lines: List[String]): Int = {
-    -1
+    val h = lines.length
+    val w = lines(0).length()
+
+    val rs =
+      (0 until h).flatMap(r =>
+        List((Pair(r, 0), right), (Pair(r, w - 1), left))
+      )
+    val cs =
+      (0 until w).flatMap(c => List((Pair(0, c), down), (Pair(h - 1, c), up)))
+
+    (rs ++ cs).map((pos, dir) => energise(lines)(pos, dir)).max
   }
 
   def solve(lines: List[String]): List[Int] = {
