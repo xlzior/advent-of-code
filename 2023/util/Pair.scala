@@ -5,6 +5,7 @@ class Pair(val x: Int, val y: Int) {
   val c = y
   def +(other: Pair): Pair = Pair(x + other.x, y + other.y)
   def -(other: Pair): Pair = Pair(x - other.x, y - other.y)
+  def unary_- = Pair(-x, -y)
   def *(factor: Int): Pair = Pair(x * factor, y * factor)
   def %(other: Pair): Pair = Pair(x % other.x, y % other.y)
   def <(other: Pair): Boolean = x < other.x && y < other.y
