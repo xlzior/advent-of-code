@@ -1,89 +1,55 @@
-import scala.collection.mutable.Set
-import scala.collection.mutable.Queue
-
 import util._
 
 object Day extends Solution {
   val instruction = """([UDLR]) (\d+) \(#([a-f0-9]{6})\)""".r
 
-  val dirs = Map(
+  val dirMap = Map(
     "U" -> Pair(-1, 0),
     "D" -> Pair(1, 0),
     "L" -> Pair(0, -1),
     "R" -> Pair(0, 1)
   )
+  val dirString = "RDLU"
 
-  def floodfill(
-      border: Set[Pair],
-      start: Pair,
-      topLeft: Pair,
-      bottomRight: Pair
-  ): Set[Pair] = {
-    val outside = Set[Pair](start)
-    val queue = Queue[Pair](start)
-
-    while (queue.nonEmpty) {
-      val curr = queue.dequeue()
-
-      dirs.values
-        .map(dir => dir + curr)
-        .filter(next => topLeft <= next && next <= bottomRight)
-        .foreach(next => {
-          if (!border.contains(next) && !outside.contains(next)) {
-            queue.enqueue(next)
-            outside.add(next)
-          }
-        })
-    }
-
-    outside
-  }
-
-  def part1(instructions: List[(Pair, Int, String)]): Int = {
-    var curr = Pair(0, 0)
-    val border = Set[Pair](curr)
-
-    instructions.foreach((dir, count, colour) => {
-      (1 to count).foreach(i => border.add(curr + dir * i))
-      curr = curr + dir * count
-    })
-    val topLeft = Pair(border.map(_.r).min - 1, border.map(_.c).min - 1)
-    val bottomRight = Pair(border.map(_.r).max + 1, border.map(_.c).max + 1)
-
-    val outside = floodfill(border, topLeft, topLeft, bottomRight)
-    val area = (bottomRight.r - topLeft.r + 1) * (bottomRight.c - topLeft.c + 1)
-
-    area - outside.size
-
-    // println(outside.size)
-    // (topLeft.r to bottomRight.r).foreach(r => {
-    //   (topLeft.c to bottomRight.c).foreach(c => {
-    //     print(
-    //       if (border.contains(Pair(r, c))) "#"
-    //       else if (outside contains Pair(r, c)) "."
-    //       else "~"
-    //     )
-    //   })
-    //   println()
-    // })
-
-    // border.size
-  }
-
-  def part2(instructions: List[(Pair, Int, String)]): Int = {
-    -1
-  }
-
-  def solve(lines: List[String]): List[Int] = {
-    val instructions = lines.map(_ match {
-      case instruction(udlr, num, colour) => {
-        val dir = dirs(udlr)
-        val count = num.toInt
-        (dir, count, colour)
+  def findArea(instructions: List[(String, Int)]): Long = {
+    val (border, points, _) = instructions
+      .foldLeft((0L, List[Pair](), Pair(0, 0))) {
+        case ((border, points, pos), (dir, count)) => {
+          val next = pos + dirMap(dir) * count
+          (border + count, next :: points, next)
+        }
       }
+
+    val xs = points.map(_.x.toLong)
+    val ys = points.map(_.y.toLong)
+    val s1 = xs.zip(ys.drop(1) :+ ys.head).map((x, y) => x * y).sum
+    val s2 = ys.zip(xs.drop(1) :+ xs.head).map((x, y) => x * y).sum
+
+    (s1 - s2).abs / 2 + border / 2 + 1
+  }
+
+  def part1(lines: List[String]): Long = {
+    val instructions = lines.map(_ match {
+      case instruction(udlr, count, _) => (udlr, count.toInt)
     })
 
-    List(part1(instructions), part2(instructions))
+    findArea(instructions)
+  }
+
+  def part2(lines: List[String]): Long = {
+    val instructions = lines.map(_ match {
+      case instruction(_, _, colour) =>
+        (
+          dirString(colour.last.asDigit).toString(),
+          Integer.parseInt(colour.slice(0, 5), 16),
+        )
+    })
+
+    findArea(instructions)
+  }
+
+  def solve(lines: List[String]): List[Long] = {
+    List(part1(lines), part2(lines))
   }
 
   def main(args: Array[String]): Unit = {
