@@ -1,5 +1,4 @@
-import util.Solution
-import util.FileUtils
+import util._
 
 object Day extends Solution {
   def part1(lines: List[String]): Int = {
