@@ -21,12 +21,6 @@ class Pair(val x: Int, val y: Int) {
       case _           => false
     }
   }
-  override def hashCode(): Int = {
-    val prime = 31 // Pick a prime number
-    var result = 1
-    result = prime * result + x.hashCode()
-    result = prime * result + y.hashCode()
-    result
-  }
+  override def hashCode(): Int = (x, y).hashCode()
   override def toString(): String = s"($x, $y)"
 }
