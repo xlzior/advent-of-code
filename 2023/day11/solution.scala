@@ -1,6 +1,4 @@
-import util.Solution
-import util.FileUtils
-import util.Pair
+import util._
 
 object Day extends Solution {
   def emptyLines(lines: List[String]): List[Int] =
@@ -11,7 +9,7 @@ object Day extends Solution {
     val emptyCols = emptyLines(lines.transpose.map(_.mkString))
 
     val galaxies = lines.zipWithIndex.flatMap((row, r) =>
-      row.zipWithIndex.collect { case ('#', c) => Pair(r, c) }
+      row.zipWithIndex.collect { case ('#', c) => Pair[Int](r, c) }
     )
 
     galaxies

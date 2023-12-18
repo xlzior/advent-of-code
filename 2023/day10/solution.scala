@@ -3,28 +3,31 @@ import scala.collection.mutable.Queue
 import scala.collection.mutable.Map
 
 import util.FileUtils
-import util.Pair
-import util.Solution
+import util._
 
 object PrintUtils {
   val bdc =
     Map('|' -> '│', '-' -> '─', 'L' -> '└', 'J' -> '┘', '7' -> '┐', 'F' -> '┌')
       .withDefault(c => c)
 
-  def printPipes(pipes: Map[Pair, Char], dimensions: Pair) = {
+  def printPipes(pipes: Map[Pair[Int], Char], dimensions: Pair[Int]) = {
     (0 until dimensions.y).foreach(y => {
       (0 until dimensions.x).foreach(x => {
-        print(bdc(pipes.getOrElse(Pair(x, y), '.')))
+        print(bdc(pipes.getOrElse(Pair[Int](x, y), '.')))
       })
       println()
     })
     println()
   }
 
-  def printMap(pipes: Map[Pair, Char], dimensions: Pair, outside: Set[Pair]) = {
+  def printMap(
+      pipes: Map[Pair[Int], Char],
+      dimensions: Pair[Int],
+      outside: Set[Pair[Int]]
+  ) = {
     (0 until dimensions.y).foreach(y => {
       (0 until dimensions.x).foreach(x => {
-        val xy = Pair(x, y)
+        val xy = Pair[Int](x, y)
         print(bdc(pipes.getOrElse(xy, if (outside.contains(xy)) 'O' else 'I')))
       })
       println()
@@ -35,10 +38,10 @@ object PrintUtils {
 }
 
 object Day10 extends Solution {
-  val north = Pair(0, -1)
-  val south = Pair(0, 1)
-  val east = Pair(1, 0)
-  val west = Pair(-1, 0)
+  val north = Pair[Int](0, -1)
+  val south = Pair[Int](0, 1)
+  val east = Pair[Int](1, 0)
+  val west = Pair[Int](-1, 0)
 
   val deltas = List(north, south, east, west)
 
@@ -51,19 +54,19 @@ object Day10 extends Solution {
     'F' -> Map(west -> south, north -> east)
   )
 
-  def get(grid: List[String], p: Pair): Char = {
+  def get(grid: List[String], p: Pair[Int]): Char = {
     val h = grid.length
     val w = grid(0).length
 
-    if (Pair(0, 0) <= p && p < Pair(w, h)) grid(p.y)(p.x)
+    if (Pair[Int](0, 0) <= p && p < Pair[Int](w, h)) grid(p.y)(p.x)
     else '.'
   }
 
-  def getStart(grid: List[String]): (Pair, Char) = {
+  def getStart(grid: List[String]): (Pair[Int], Char) = {
     val start = grid.zipWithIndex
       .flatMap((line, y) => {
         val x = line.indexOf("S")
-        if (x >= 0) List(Pair(x, y)) else List.empty
+        if (x >= 0) List(Pair[Int](x, y)) else List.empty
       })(0)
 
     val surroundings =
@@ -81,10 +84,10 @@ object Day10 extends Solution {
     (start, pipe)
   }
 
-  def findLoop(grid: List[String]): Map[Pair, Char] = {
+  def findLoop(grid: List[String]): Map[Pair[Int], Char] = {
     val (start, pipe) = getStart(grid)
     var ghosts = next(pipe).values.map(dir => (start, dir))
-    var pipes = Map[Pair, Char](start -> pipe)
+    var pipes = Map[Pair[Int], Char](start -> pipe)
 
     while (pipes.size == 1 || ghosts.map(_._1).toSet.size > 1) {
       ghosts = ghosts.map((pos, dir) => {
@@ -100,10 +103,10 @@ object Day10 extends Solution {
   val eastWest = Set('-', 'F', 'L')
   val northSouth = Set('|', 'F', '7')
 
-  def expand(pipes: Map[Pair, Char]): Map[Pair, Char] = {
+  def expand(pipes: Map[Pair[Int], Char]): Map[Pair[Int], Char] = {
     val expanded = pipes.map((coords, pipe) => (coords * 2, pipe)).toMap
 
-    Map[Pair, Char](
+    Map[Pair[Int], Char](
       expanded
         .foldLeft(expanded)((acc, curr) => {
           val (coords, pipe) = curr
@@ -114,21 +117,25 @@ object Day10 extends Solution {
             result = result.updated(coords + south, '|')
           result
         })
-        .map((coords, pipe) => (coords + Pair(1, 1), pipe))
+        .map((coords, pipe) => (coords + Pair[Int](1, 1), pipe))
         .toSeq: _*
     )
   }
 
-  def floodfill(pipes: Map[Pair, Char], start: Pair, size: Pair): Set[Pair] = {
-    val outside = Set[Pair](start)
-    val queue = Queue[Pair](start)
+  def floodfill(
+      pipes: Map[Pair[Int], Char],
+      start: Pair[Int],
+      size: Pair[Int]
+  ): Set[Pair[Int]] = {
+    val outside = Set[Pair[Int]](start)
+    val queue = Queue[Pair[Int]](start)
 
     while (queue.nonEmpty) {
       val curr = queue.dequeue()
 
       deltas
         .map(delta => delta + curr)
-        .filter(next => Pair(0, 0) <= next && next < size)
+        .filter(next => Pair[Int](0, 0) <= next && next < size)
         .foreach(next => {
           if (!pipes.contains(next) && !outside.contains(next)) {
             queue.enqueue(next)
@@ -140,12 +147,12 @@ object Day10 extends Solution {
     outside
   }
 
-  def gridCoordinates(start: Pair, end: Pair): IndexedSeq[Pair] =
+  def gridCoordinates(start: Pair[Int], end: Pair[Int]): IndexedSeq[Pair[Int]] =
     (start.x until end.x).flatMap(x =>
-      (start.y until end.y).map(y => Pair(x, y))
+      (start.y until end.y).map(y => Pair[Int](x, y))
     )
 
-  def preExpansion(p: Pair): Boolean = p.y % 2 == 1 && p.x % 2 == 1
+  def preExpansion(p: Pair[Int]): Boolean = p.y % 2 == 1 && p.x % 2 == 1
 
   def solve(grid: List[String]): List[Int] = {
     val h = grid.length
@@ -155,13 +162,13 @@ object Day10 extends Solution {
 
     val pipes = findLoop(grid)
     val expanded = expand(pipes)
-    val all = gridCoordinates(Pair(0, 0), Pair(W, H)).toSet
-    val outside = floodfill(expanded, Pair(0, 0), Pair(W, H))
+    val all = gridCoordinates(Pair[Int](0, 0), Pair[Int](W, H)).toSet
+    val outside = floodfill(expanded, Pair[Int](0, 0), Pair[Int](W, H))
     val inside = (all -- outside -- expanded.keySet).filter(preExpansion)
 
-    // PrintUtils.printPipes(pipes, Pair(w, h))
-    // PrintUtils.printPipes(expanded, Pair(W, H))
-    // PrintUtils.printMap(expanded, Pair(W, H), outside)
+    // PrintUtils.printPipes(pipes, Pair[Int](w, h))
+    // PrintUtils.printPipes(expanded, Pair[Int](W, H))
+    // PrintUtils.printMap(expanded, Pair[Int](W, H), outside)
 
     List(pipes.size / 2, inside.size)
   }

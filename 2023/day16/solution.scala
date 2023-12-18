@@ -1,22 +1,23 @@
 import scala.collection.mutable.Set
 import scala.collection.mutable.Queue
 
-import util.Solution
-import util.FileUtils
-import util.Pair
-import util.Grid
+import util._
 
 object Day extends Solution {
-  type Beam = (Pair, Pair)
-  val up = Pair(-1, 0)
-  val down = Pair(1, 0)
-  val left = Pair(0, -1)
-  val right = Pair(0, 1)
+  type Beam = (Pair[Int], Pair[Int])
+  val up = Pair[Int](-1, 0)
+  val down = Pair[Int](1, 0)
+  val left = Pair[Int](0, -1)
+  val right = Pair[Int](0, 1)
 
   val nextDirs = Map(
-    '.' -> Map[Pair, List[Pair]]().withDefault(p => List(p)),
-    '/' -> Map[Pair, List[Pair]]().withDefault(p => List(Pair(-p.c, -p.r))),
-    '\\' -> Map[Pair, List[Pair]]().withDefault(p => List(Pair(p.c, p.r))),
+    '.' -> Map[Pair[Int], List[Pair[Int]]]().withDefault(p => List(p)),
+    '/' -> Map[Pair[Int], List[Pair[Int]]]().withDefault(p =>
+      List(Pair[Int](-p.c, -p.r))
+    ),
+    '\\' -> Map[Pair[Int], List[Pair[Int]]]().withDefault(p =>
+      List(Pair[Int](p.c, p.r))
+    ),
     '-' -> Map(up -> List(left, right), down -> List(left, right))
       .withDefault(p => List(p)),
     '|' -> Map(left -> List(up, down), right -> List(up, down))
@@ -35,7 +36,7 @@ object Day extends Solution {
         .map(obj =>
           nextDirs(obj)(dir).foreach(dir => {
             val next = (pos + dir, dir)
-            if (grid.isValid(next._1) && !explored.contains(next)) {
+            if (grid.contains(next._1) && !explored.contains(next)) {
               explored.add(next)
               queue.enqueue(next)
             }
@@ -47,15 +48,15 @@ object Day extends Solution {
   }
 
   def part1(grid: Grid[Char]): Int = {
-    energise(grid)((Pair(0, 0), right))
+    energise(grid)((Pair[Int](0, 0), right))
   }
 
   def part2(grid: Grid[Char]): Int = {
     val rs = (0 until grid.h).flatMap(r =>
-      List((Pair(r, 0), right), (Pair(r, grid.w - 1), left))
+      List((Pair[Int](r, 0), right), (Pair[Int](r, grid.w - 1), left))
     )
     val cs = (0 until grid.w).flatMap(c =>
-      List((Pair(0, c), down), (Pair(grid.h - 1, c), up))
+      List((Pair[Int](0, c), down), (Pair[Int](grid.h - 1, c), up))
     )
 
     (rs ++ cs).map(energise(grid)).max

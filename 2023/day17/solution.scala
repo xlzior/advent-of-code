@@ -1,25 +1,25 @@
 import util._
 
-val up = Pair(-1, 0)
-val down = Pair(1, 0)
-val left = Pair(0, -1)
-val right = Pair(0, 1)
+val up = Pair[Int](-1, 0)
+val down = Pair[Int](1, 0)
+val left = Pair[Int](0, -1)
+val right = Pair[Int](0, 1)
 
 class CrucibleState(
     val grid: Grid[Int],
     val min: Int,
     val max: Int,
-    val pos: Pair,
-    val dirs: List[Pair]
+    val pos: Pair[Int],
+    val dirs: List[Pair[Int]]
 ) extends State {
-  val nextDirs = Map[Pair, List[Pair]](
+  val nextDirs = Map[Pair[Int], List[Pair[Int]]](
     up -> List(left, right),
     down -> List(left, right),
     left -> List(up, down),
     right -> List(up, down)
   )
 
-  def isGoal: Boolean = pos == Pair(grid.h - 1, grid.w - 1)
+  def isGoal: Boolean = pos == Pair[Int](grid.h - 1, grid.w - 1)
 
   def neighbours: List[(Int, CrucibleState)] =
     dirs
@@ -47,7 +47,13 @@ class CrucibleState(
 
 object Day extends Solution {
   def crucible(grid: Grid[Int], min: Int, max: Int): Int = {
-    CrucibleState(grid, min, max, Pair(0, 0), List(right, down)).shortestPath
+    CrucibleState(
+      grid,
+      min,
+      max,
+      Pair[Int](0, 0),
+      List(right, down)
+    ).shortestPath
   }
 
   def part1(grid: Grid[Int]): Int = crucible(grid, 1, 3)

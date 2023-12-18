@@ -1,12 +1,10 @@
-import util.FileUtils
-import util.Pair
-import util.Timer
+import util._
 
 object Solution {
   val symbolPattern = """[^\d\s.]""".r
   val numberPattern = """(\d+)""".r
   val gearPattern = """[*]""".r
-  val deltas = (-1 to 1).flatMap(x => (-1 to 1).map(y => Pair(x, y)))
+  val deltas = (-1 to 1).flatMap(x => (-1 to 1).map(y => Pair[Int](x, y)))
 
   def main(args: Array[String]): Unit = {
     val lines: List[String] = FileUtils.read(args(0))
@@ -16,20 +14,20 @@ object Solution {
     val timer = Timer()
     timer.checkpoint()
 
-    var gears = Map[Pair, List[Int]]().withDefault(_ => List.empty)
+    var gears = Map[Pair[Int], List[Int]]().withDefault(_ => List.empty)
 
     val part1 = lines.zipWithIndex
       .flatMap((line, y) =>
         numberPattern
           .findAllMatchIn(line)
           .map(m =>
-            (m.group(1).toInt, (m.start to m.end - 1).map(x => Pair(x, y)))
+            (m.group(1).toInt, (m.start to m.end - 1).map(x => Pair[Int](x, y)))
           )
       )
       .filter((n, coords) => {
         coords
           .flatMap(c => deltas.map(d => c + d))
-          .filter(p => Pair(0, 0) <= p && p < Pair(w, h))
+          .filter(p => Pair[Int](0, 0) <= p && p < Pair[Int](w, h))
           .exists(p => {
             if (lines(p.y)(p.x) == '*') {
               gears = gears.updated(p, n :: gears(p))

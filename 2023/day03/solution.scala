@@ -1,12 +1,10 @@
-import util.FileUtils
-import util.Pair
-import util.Timer
+import util._
 
 object Solution {
   val symbolPattern = """[^\d\s.]""".r
   val numberPattern = """(\d+)""".r
   val gearPattern = """[*]""".r
-  val deltas = (-1 to 1).flatMap(x => (-1 to 1).map(y => Pair(x, y)))
+  val deltas = (-1 to 1).flatMap(x => (-1 to 1).map(y => Pair[Int](x, y)))
 
   def main(args: Array[String]): Unit = {
     val lines: List[String] = FileUtils.read(args(0))
@@ -16,7 +14,7 @@ object Solution {
 
     val symbols = lines.zipWithIndex
       .flatMap((line, y) =>
-        symbolPattern.findAllMatchIn(line).map(m => Pair(m.start, y))
+        symbolPattern.findAllMatchIn(line).map(m => Pair[Int](m.start, y))
       )
       .toSet
 
@@ -24,7 +22,7 @@ object Solution {
       numberPattern
         .findAllMatchIn(line)
         .map(m =>
-          (m.group(1).toInt, (m.start to m.end - 1).map(x => Pair(x, y)))
+          (m.group(1).toInt, (m.start to m.end - 1).map(x => Pair[Int](x, y)))
         )
     )
 
@@ -45,7 +43,7 @@ object Solution {
     timer.checkpoint()
 
     val gears = lines.zipWithIndex.flatMap((line, y) =>
-      gearPattern.findAllMatchIn(line).map(m => Pair(m.start, y))
+      gearPattern.findAllMatchIn(line).map(m => Pair[Int](m.start, y))
     )
 
     val part2 = gears
