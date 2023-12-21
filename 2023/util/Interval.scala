@@ -2,11 +2,17 @@ package util
 
 class Interval[T](val start: T, val end: T) {
   def +(other: T)(implicit num: Numeric[T]): Interval[T] = {
-    new Interval(num.plus(start, other), num.plus(end, other))
+    Interval(num.plus(start, other), num.plus(end, other))
   }
+
+  def size(implicit num: Numeric[T]): T = num.minus(end, start)
 
   def contains(value: T)(implicit ord: Ordering[T]): Boolean = {
     ord.lteq(start, value) && ord.lt(value, end)
+  }
+
+  def splitBy(value: T)(implicit ord: Ordering[T]): Boolean = {
+    start != value && contains(value)
   }
 
   def intersects(other: Interval[T])(implicit ord: Ordering[T]): Boolean = {
@@ -21,8 +27,8 @@ class Interval[T](val start: T, val end: T) {
     *   list of Intervals following the splitting
     */
   def split(value: T)(implicit ord: Ordering[T]): List[Interval[T]] = {
-    if (start != value && contains(value)) {
-      List(new Interval(start, value), new Interval(value, end))
+    if (splitBy(value)) {
+      List(Interval(start, value), Interval(value, end))
     } else {
       List(this)
     }
