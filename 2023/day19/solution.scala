@@ -13,27 +13,20 @@ object Day extends Solution {
   val gt = """([xmas])>(\d+):([ARa-z]+)""".r
   val default = """([ARa-z]+)""".r
 
+  def parseWorkflow(s: String): (String, Workflow) = {
+    val Array(name, steps) = s.replace("}", "").split('{')
+    (name, steps.split(",").toList)
+  }
+
+  def parsePart(s: String): Part = category
+    .findAllMatchIn(s)
+    .map(m => (m.group(1), m.group(2).toInt))
+    .toMap
+
   def parse(lines: List[String]): (Workflows, Parts) = {
-    val Array(w, p) = lines.mkString("\n").split("\n\n")
-
-    val workflows = w
-      .split("\n")
-      .map(s => {
-        val Array(name, steps) = s.replace("}", "").split('{')
-        (name, steps.split(",").toList)
-      })
-      .toMap
-
-    val parts = p
-      .split("\n")
-      .map(part =>
-        category
-          .findAllMatchIn(part)
-          .map(m => (m.group(1), m.group(2).toInt))
-          .toMap
-      )
-      .toList
-
+    val Array(w, p) = lines.mkString("\n").split("\n\n").map(_.split("\n"))
+    val workflows = w.map(parseWorkflow).toMap
+    val parts = p.map(parsePart).toList
     (workflows, parts)
   }
 
@@ -46,23 +39,20 @@ object Day extends Solution {
     }
   }
 
-  def sortPart(workflows: Workflows, part: Part): String = {
-    var name = "in"
-    while (name != "A" && name != "R") {
-      name = sortPart(workflows(name), part)
-    }
-    name
-  }
-
   def part1(workflows: Workflows, parts: List[Part]): Int = {
-    parts.filter(part => sortPart(workflows, part) == "A").map(_.values.sum).sum
+    parts
+      .filter(part => {
+        var name = "in"
+        while (name != "A" && name != "R") {
+          name = sortPart(workflows(name), part)
+        }
+        name == "A"
+      })
+      .map(_.values.sum)
+      .sum
   }
 
-  def splitIntervalPart(
-      part: IntervalPart,
-      key: String,
-      value: Int
-  ): List[IntervalPart] = {
+  def split(part: IntervalPart, key: String, value: Int): List[IntervalPart] = {
     part(key).split(value) match {
       case List(only) => List(part)
       case List(left, right) =>
@@ -71,31 +61,26 @@ object Day extends Solution {
   }
 
   def sortInterval(
-      workflow: Workflow,
-      part: IntervalPart
-  ): List[(String, IntervalPart)] = {
+      workflow: Workflow
+  )(part: IntervalPart): List[(String, IntervalPart)] = {
     workflow.head match {
       case default(dst) => List((dst, part))
       case lt(key, value, dst) => {
         val threshold = value.toInt
         if (part(key).splitBy(threshold)) {
-          splitIntervalPart(part, key, threshold).flatMap(subpart =>
-            sortInterval(workflow, subpart)
-          )
+          split(part, key, threshold).flatMap(sortInterval(workflow))
         } else if (part(key).end <= threshold) {
           List((dst, part))
         } else {
-          sortInterval(workflow.tail, part)
+          sortInterval(workflow.tail)(part)
         }
       }
       case gt(key, value, dst) => {
-        val threshold = value.toInt
-        if (part(key).splitBy(threshold + 1)) {
-          splitIntervalPart(part, key, threshold + 1).flatMap(part =>
-            sortInterval(workflow, part)
-          )
-        } else if (part(key).end <= threshold + 1) {
-          sortInterval(workflow.tail, part)
+        val threshold = value.toInt + 1
+        if (part(key).splitBy(threshold)) {
+          split(part, key, threshold).flatMap(sortInterval(workflow))
+        } else if (part(key).end <= threshold) {
+          sortInterval(workflow.tail)(part)
         } else {
           List((dst, part))
         }
@@ -104,31 +89,24 @@ object Day extends Solution {
   }
 
   def part2(workflows: Workflows): Long = {
-    var unsortedParts = List(
-      (
-        "in",
-        Map(
-          "x" -> Interval(1, 4001),
-          "m" -> Interval(1, 4001),
-          "a" -> Interval(1, 4001),
-          "s" -> Interval(1, 4001)
-        )
-      )
+    val pangaea = Map(
+      "x" -> Interval(1, 4001),
+      "m" -> Interval(1, 4001),
+      "a" -> Interval(1, 4001),
+      "s" -> Interval(1, 4001)
     )
-
+    var parts = List(("in", pangaea))
     var sum = 0L
 
-    while (unsortedParts.nonEmpty) {
-      val (name, intervalPart) = unsortedParts.head
-      unsortedParts = unsortedParts.tail
+    while (parts.nonEmpty) {
+      val (name, part) = parts.head
+      parts = parts.tail
 
       if (name == "A") {
-        sum += intervalPart.values.map(_.size.toLong).product
+        sum += part.values.map(_.size.toLong).product
       }
       if (workflows.contains(name)) {
-        unsortedParts = unsortedParts.appendedAll(
-          sortInterval(workflows(name), intervalPart)
-        )
+        parts = parts.appendedAll(sortInterval(workflows(name))(part))
       }
     }
 
