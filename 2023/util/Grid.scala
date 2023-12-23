@@ -9,4 +9,11 @@ class Grid[A](val grid: Array[Array[A]]) {
 
   def get(pos: Pair[Int]): Option[A] =
     if (contains(pos)) Some(grid(pos.r)(pos.c)) else None
+
+  def find(target: A): Option[Pair[Int]] =
+    grid.zipWithIndex
+      .flatMap((row, r) =>
+        row.zipWithIndex.collect { case (x, c) if x == target => Pair(r, c) }
+      )
+      .headOption
 }
