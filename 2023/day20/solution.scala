@@ -1,43 +1,37 @@
 import scala.collection.mutable.Queue
 import util._
 
-enum PulseType:
+enum Strength:
   case low, high
 
-type Pulse = (String, PulseType, String)
+type Pulse = (String, Strength, String)
 
 trait Module:
   val name: String
   val outputs: List[String]
 
-  def pulse(from: String, pulseType: PulseType): List[Pulse] = {
-    val pulse = pulseType match {
-      case PulseType.low  => low(from)
-      case PulseType.high => high(from)
-    }
-    pulse
-      .map(pulseType => outputs.map(to => (name, pulseType, to)))
+  def pulse(from: String, strength: Strength): List[Pulse] = {
+    send(receive(from, strength))
+  }
+
+  def receive(from: String, strength: Strength): Option[Strength]
+
+  def send(strength: Option[Strength]): List[Pulse] = {
+    strength
+      .map(s => outputs.map(to => (name, s, to)))
       .getOrElse(List.empty)
   }
 
-  def low(from: String): Option[PulseType]
-  def high(from: String): Option[PulseType]
-
 class FlipFlop(val name: String, val outputs: List[String]) extends Module {
-  // Flip-flop modules (prefix %) are either on or off; they are initially off.
   var on = false
 
-  def high(from: String): Option[PulseType] = {
-    // If a flip-flop module receives a high pulse, it is ignored and nothing happens.
-    None
-  }
-
-  def low(from: String): Option[PulseType] = {
-    // However, if a flip-flop module receives a low pulse, it flips between on and off.
-    // If it was off, it turns on and sends a high pulse.
-    // If it was on, it turns off and sends a low pulse.
-    on = !on
-    Some(if (on) PulseType.high else PulseType.low)
+  def receive(from: String, strength: Strength): Option[Strength] = {
+    strength match
+      case Strength.high => None
+      case Strength.low => {
+        on = !on
+        Some(if (on) Strength.high else Strength.low)
+      }
   }
 
   override def toString(): String = s"$name: $outputs"
@@ -48,28 +42,14 @@ class Conjunction(
     val inputs: List[String],
     val outputs: List[String]
 ) extends Module {
-  // Conjunction modules (prefix &) remember the type of the most recent pulse received from each of their connected input modules; they initially default to remembering a low pulse for each input.
+  var memory = inputs.map(i => (i, Strength.low)).toMap
 
-  var memory = inputs.map(i => (i, PulseType.low)).toMap
-
-  def getPulseType: Option[PulseType] = {
+  def receive(from: String, strength: Strength): Option[Strength] = {
+    memory = memory.updated(from, strength)
     Some(
-      if (memory.values.forall(_ == PulseType.high)) PulseType.low
-      else PulseType.high
+      if (memory.values.forall(_ == Strength.high)) Strength.low
+      else Strength.high
     )
-  }
-
-  // When a pulse is received, the conjunction module first updates its memory for that input.
-  // Then, if it remembers high pulses for all inputs, it sends a low pulse;
-  // otherwise, it sends a high pulse.
-  def high(from: String): Option[PulseType] = {
-    memory = memory.updated(from, PulseType.high)
-    getPulseType
-  }
-
-  def low(from: String): Option[PulseType] = {
-    memory = memory.updated(from, PulseType.low)
-    getPulseType
   }
 
   override def toString(): String = s"$name: $inputs | $outputs"
@@ -77,11 +57,8 @@ class Conjunction(
 
 class Broadcaster(val outputs: List[String]) extends Module {
   val name = "broadcaster"
-  // There is a single broadcast module (named broadcaster).
-  // When it receives a pulse, it sends the same pulse to all of its destination modules.
-
-  def high(from: String): Option[PulseType] = Some(PulseType.high)
-  def low(from: String): Option[PulseType] = Some(PulseType.low)
+  def receive(from: String, strength: Strength): Option[Strength] =
+    Some(strength)
 
   override def toString(): String = s"$name: $outputs"
 }
@@ -89,9 +66,7 @@ class Broadcaster(val outputs: List[String]) extends Module {
 class Test extends Module {
   val name = "output"
   val outputs = List.empty
-  def high(from: String): Option[PulseType] = None
-  def low(from: String): Option[PulseType] = None
-
+  def receive(from: String, strength: Strength): Option[Strength] = None
 }
 
 object Day extends Solution {
@@ -139,17 +114,17 @@ object Day extends Solution {
     var high = 0
 
     for (i <- 1 to 1000) {
-      val pulses = Queue[Pulse](("button", PulseType.low, "broadcaster"))
+      val pulses = Queue[Pulse](("button", Strength.low, "broadcaster"))
 
       while (pulses.nonEmpty) {
-        val (from, pulseType, to) = pulses.dequeue()
+        val (from, strength, to) = pulses.dequeue()
 
         // Part 1
-        pulseType match
-          case PulseType.low  => low += 1
-          case PulseType.high => high += 1
+        strength match
+          case Strength.low  => low += 1
+          case Strength.high => high += 1
 
-        val nextPulses = modules(to).pulse(from, pulseType)
+        val nextPulses = modules(to).pulse(from, strength)
         pulses.enqueueAll(nextPulses)
       }
     }
