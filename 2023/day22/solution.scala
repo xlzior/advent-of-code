@@ -1,4 +1,6 @@
 import scala.collection.mutable.Set
+import scala.collection.mutable.Map
+import scala.collection.mutable.Queue
 
 import util._
 
@@ -6,6 +8,15 @@ class XYZ(val x: Int, val y: Int, val z: Int) {
   def decreaseZ(dz: Int): XYZ = XYZ(x, y, z - dz)
 
   override def toString(): String = s"($x, $y, $z)"
+
+  override def equals(x: Any): Boolean = {
+    x match {
+      case other: XYZ =>
+        this.x == other.x && this.y == other.y && this.z == other.z
+      case _ => false
+    }
+  }
+  override def hashCode(): Int = (x, y, z).hashCode()
 }
 
 class Block(val start: XYZ, val end: XYZ) {
@@ -17,6 +28,12 @@ class Block(val start: XYZ, val end: XYZ) {
   def decreaseZ(dz: Int): Block = Block(start.decreaseZ(dz), end.decreaseZ(dz))
 
   override def toString(): String = s"$start ~ $end"
+
+  override def equals(x: Any): Boolean = x match {
+    case other: Block => this.start == other.start && this.end == other.end
+    case _            => false
+  }
+  override def hashCode(): Int = (start, end).hashCode()
 }
 
 object Day extends Solution {
@@ -35,7 +52,7 @@ object Day extends Solution {
     (supports, curr.start.z - (highest.end.z + 1))
   }
 
-  def part1(lines: List[String]): Int = {
+  def solve(lines: List[String]): List[Int] = {
     var falling = lines
       .map(line => {
         val Array(sx, sy, sz, ex, ey, ez) =
@@ -47,27 +64,54 @@ object Day extends Solution {
     val ground = getGround(falling)
     val settled = Set(ground)
     val soleBreadwinners = Set[Block]()
+    val outgoing = Map[Block, List[Block]](ground -> List.empty)
+    val incoming = Map[Block, Set[Block]]()
 
     while (falling.nonEmpty) {
       val curr = falling.head
       falling = falling.tail
 
       val (supports, dz) = simulateFall(settled, curr)
-      settled.add(curr.decreaseZ(dz))
+      val currSettled = curr.decreaseZ(dz)
+      settled.add(currSettled)
       if (supports.size == 1) {
         soleBreadwinners.addAll(supports)
       }
+
+      incoming(currSettled) = supports
+      outgoing(currSettled) = List.empty
+      supports.foreach(support =>
+        outgoing(support) = outgoing(support).appended(currSettled)
+      )
     }
 
-    settled.size - soleBreadwinners.size
-  }
+    val part1 = settled.size - soleBreadwinners.size
 
-  def part2(lines: List[String]): Int = {
-    -1
-  }
+    val part2 = (soleBreadwinners - ground).toList
+      .map(start => {
+        var supportedBy = incoming.toMap.map((k, v) => (k, v.toSet))
+        val queue = Queue[Block](start)
+        val falls = Set[Block]()
 
-  def solve(lines: List[String]): List[Int] = {
-    List(part1(lines), part2(lines))
+        while (queue.nonEmpty) {
+          val curr = queue.dequeue()
+          falls.add(curr)
+
+          for (out <- outgoing(curr)) {
+            supportedBy = supportedBy.updated(out, supportedBy(out) - curr)
+            if (supportedBy(out).isEmpty) {
+              queue.enqueue(out)
+            }
+          }
+        }
+
+        (falls - start).size
+      })
+      .sorted
+
+    // println(part2)
+
+    List(part1, part2.sum)
   }
 
   def main(args: Array[String]): Unit = {
