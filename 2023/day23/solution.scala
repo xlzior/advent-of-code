@@ -43,7 +43,74 @@ object Day extends Solution {
   }
 
   def part2(grid: Grid[Char]): Int = {
-    -1
+    val checkpoints = grid.iterator
+      .filter(curr => {
+        val cell = grid.get(curr).getOrElse('#')
+        val neighbours = List(up, down, left, right)
+          .map(dir => grid.get(curr + dir).getOrElse('#'))
+          .count(_ != '#')
+
+        cell != '#' && neighbours != 2
+      })
+      .toSet
+
+    val graph = mutable.Map[Pair[Int], mutable.Map[Pair[Int], Int]]()
+
+    checkpoints.foreach(checkpoint => {
+      val queue = mutable.Queue((0, checkpoint))
+      val visited = mutable.Set(checkpoint)
+
+      while (queue.nonEmpty) {
+        val (numSteps, curr) = queue.dequeue()
+
+        if (checkpoint != curr && checkpoints.contains(curr)) {
+          if (!graph.contains(checkpoint))
+            graph(checkpoint) = mutable.Map[Pair[Int], Int]()
+          if (!graph.contains(curr))
+            graph(curr) = mutable.Map[Pair[Int], Int]()
+
+          graph(checkpoint)(curr) = numSteps
+          graph(curr)(checkpoint) = numSteps
+        } else {
+          List(up, down, left, right).foreach(dir => {
+            val next = curr + dir
+            if (
+              grid.get(next).getOrElse('#') != '#' &&
+              !visited.contains(next)
+            ) {
+              queue.enqueue((numSteps + 1, next))
+              visited.add(next)
+            }
+          })
+        }
+      }
+    })
+
+    val start = Pair(0, 1)
+    val end = Pair(grid.h - 1, grid.w - 2)
+    val queue = mutable.Queue((0, Set[Pair[Int]](), start))
+    val prune =
+      mutable.Map[Set[Pair[Int]], Int]().withDefault(_ => 0)
+    var maxSteps = 0
+
+    while (queue.nonEmpty) {
+      val (numSteps, path, curr) = queue.dequeue()
+
+      if (curr == end) maxSteps = maxSteps.max(numSteps)
+      else {
+        graph(curr)
+          .filter((next, weight) =>
+            !path.contains(next) &&
+              numSteps + weight > prune(path + curr)
+          )
+          .foreach((next, weight) => {
+            queue.enqueue((numSteps + weight, path + curr, next))
+            prune(path + curr) = numSteps + weight
+          })
+      }
+    }
+
+    maxSteps
   }
 
   def solve(lines: List[String]): List[Int] = {
