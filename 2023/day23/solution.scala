@@ -42,8 +42,8 @@ object Day extends Solution {
     maxSteps
   }
 
-  def part2(grid: Grid[Char]): Int = {
-    val checkpoints = grid.iterator
+  def getCheckpoints(grid: Grid[Char]): Set[Pair[Int]] = {
+    grid.iterator
       .filter(curr => {
         val cell = grid.get(curr).getOrElse('#')
         val neighbours = List(up, down, left, right)
@@ -53,7 +53,14 @@ object Day extends Solution {
         cell != '#' && neighbours != 2
       })
       .toSet
+  }
 
+  type Graph = Map[Pair[Int], Map[Pair[Int], Int]]
+
+  def simplifyGraph(
+      checkpoints: Set[Pair[Int]],
+      grid: Grid[Char]
+  ): Graph = {
     val graph = mutable.Map[Pair[Int], mutable.Map[Pair[Int], Int]]()
 
     checkpoints.foreach(checkpoint => {
@@ -86,8 +93,10 @@ object Day extends Solution {
       }
     })
 
-    val start = Pair(0, 1)
-    val end = Pair(grid.h - 1, grid.w - 2)
+    graph.toMap.map((k, v) => (k, v.toMap))
+  }
+
+  def longestPath(graph: Graph, start: Pair[Int], end: Pair[Int]): Int = {
     val queue = mutable.Queue((0, Set[Pair[Int]](), start))
     val prune =
       mutable.Map[Set[Pair[Int]], Int]().withDefault(_ => 0)
@@ -111,6 +120,15 @@ object Day extends Solution {
     }
 
     maxSteps
+  }
+
+  def part2(grid: Grid[Char]): Int = {
+    val checkpoints = getCheckpoints(grid)
+    val graph = simplifyGraph(checkpoints, grid)
+
+    val start = Pair(0, 1)
+    val end = Pair(grid.h - 1, grid.w - 2)
+    longestPath(graph, start, end)
   }
 
   def solve(lines: List[String]): List[Int] = {
