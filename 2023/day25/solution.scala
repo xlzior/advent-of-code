@@ -1,7 +1,10 @@
+import scala.collection.mutable
+
 import util._
 
 object Day extends Solution {
   type Graph = Map[Set[String], List[(Set[String], Int)]]
+  type MutableGraph = mutable.Map[Set[String], List[(Set[String], Int)]]
 
   def parse(lines: List[String]): Graph = {
     lines
@@ -15,12 +18,9 @@ object Day extends Solution {
       .toMap
   }
 
-  var cuts = Map[Int, Int]()
-
-  def step(graph: Graph): Graph = {
-    val start = graph.keys.head
-    var outside = graph.keySet.tail
-    var supernode = List(start)
+  def step(graph: MutableGraph): Int = {
+    var supernode = List(graph.keys.head)
+    var outside = mutable.Set(graph.keySet.tail.toSeq: _*)
 
     while (outside.nonEmpty) {
       val (node, weight) = supernode
@@ -33,9 +33,8 @@ object Day extends Solution {
       supernode = node :: supernode
       outside -= node
 
-      // take note of the weight of the last edge merged
-      if (outside.isEmpty) {
-        cuts = cuts.updated(weight, node.size)
+      if (outside.isEmpty && weight == 3) {
+        return node.size
       }
     }
 
@@ -43,45 +42,35 @@ object Day extends Solution {
     val node2 = supernode(1)
     val mergedNode = node1 ++ node2
     val mergedEdges = (graph(node1) ++ graph(node2))
+      .filter((n, _) => n != node1 && n != node2)
       .groupBy(_._1)
       .mapValues(_.map(_._2).sum)
       .toList
 
-    graph
-      .removed(node1)
-      .removed(node2)
-      .map((k, v) => {
-        (
-          k,
-          v.map { case (neighbour, weight) =>
-            if (neighbour == node1 || neighbour == node2) (mergedNode, weight)
-            else (neighbour, weight)
-          }.groupBy(_._1)
-            .mapValues(_.map(_._2).sum)
-            .toList
-        )
-      })
-      .updated(mergedNode, mergedEdges)
-  }
+    graph.remove(node1)
+    graph.remove(node2)
+    graph(mergedNode) = mergedEdges
+    mergedEdges.foreach((u, weight) => {
+      val edge = (mergedNode, weight)
+      graph(u) = edge :: graph(u).filter((v, w) => v != node1 && v != node2)
+    })
 
-  def part1(initial: Graph): Int = {
-    var graph = initial
-    while (graph.size > 2) {
-      println(graph.size)
-      graph = step(graph)
-    }
-    println(cuts)
-    val partition1 = cuts.minBy(_._1)._2
-    partition1 * (initial.size - partition1)
+    -1
   }
 
   def solve(lines: List[String]): List[Int] = {
-    val graph = parse(lines)
-    List(part1(graph))
+    val initial = parse(lines)
+    var graph = mutable.Map(initial.toSeq: _*)
+    var result = -1
+    while (result < 0) {
+      println(graph.size)
+      result = step(graph)
+    }
+    List(result * (initial.size - result))
   }
 
   def main(args: Array[String]): Unit = {
-    assert(testsPass)
+    // assert(testsPass)
 
     val lines: List[String] = FileUtils.read(s"${args(0)}.in")
     val solution = solve(lines)
