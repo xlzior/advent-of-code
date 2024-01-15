@@ -6,22 +6,6 @@ import util._
 object Day extends Solution {
   val deltas = List(Pair(0, 1), Pair(1, 0), Pair(0, -1), Pair(-1, 0))
 
-  def countPlots(garden: Grid[Char], start: Pair[Int], distance: Int): Int = {
-    explore(garden, start, distance)._1.size
-  }
-
-  def part1(lines: List[String]): List[Int] = {
-    val garden = Grid(lines.map(_.toCharArray()).toArray)
-    val start = garden.find('S').get
-
-    List(
-      countPlots(garden, start, 6),
-      countPlots(garden, start, 64)
-    )
-  }
-
-  def solve(lines: List[String]): List[Int] = part1(lines)
-
   def explore(
       garden: Grid[Char],
       start: Pair[Int],
@@ -60,62 +44,52 @@ object Day extends Solution {
     (targets, same.size, diff.size)
   }
 
+  def countPlots(garden: Grid[Char], start: Pair[Int], distance: Int): Int = {
+    explore(garden, start, distance)._1.size
+  }
+
+  def part1(lines: List[String]): List[Int] = {
+    val garden = Grid(lines.map(_.toCharArray()).toArray)
+    val start = garden.find('S').get
+
+    List(
+      countPlots(garden, start, 6),
+      countPlots(garden, start, 64)
+    )
+  }
+
+  def solve(lines: List[String]): List[Int] = part1(lines)
+
   def part2(lines: List[String], distance: Long): Long = {
     val grid = Grid(lines.map(_.toCharArray()).toArray)
+    val r = grid.h / 2
 
-    val w = grid.h
-    assert(w % 2 == 1)
-    val r = w / 2
+    val coords = List(0, r, 2 * r)
+    val List(List(nw, n, ne), List(w, start, e), List(sw, s, se)) =
+      coords.map(r => coords.map(c => Pair(r, c)))
+    val edges = List(n, e, s, w)
+    val corners = List(nw, ne, se, sw)
 
-    val start = grid.find('S').get
-    val northFace = Pair(0, r)
-    val southFace = Pair(2 * r, r)
-    val westFace = Pair(r, 0)
-    val eastFace = Pair(r, 2 * r)
-    val northwestCorner = Pair(0, 0)
-    val northeastCorner = Pair(0, 2 * r)
-    val southwestCorner = Pair(2 * r, 0)
-    val southeastCorner = Pair(2 * r, 2 * r)
+    val (_, odd, even) = explore(grid, start, r)
+    val fromEdge = edges.map(edge => explore(grid, edge, 2 * r)._1)
+    val fromEdges = (fromEdge :+ fromEdge(0)).sliding(2).map {
+      case List(a, b) => a.union(b)
+    }
+    val fromCorner = corners.map(corner => explore(grid, corner, r - 1)._1)
 
-    val (_, sameParityFull, diffParityFull) = explore(grid, start, r)
-    val northTarget = explore(grid, northFace, 2 * r)._1
-    val southTarget = explore(grid, southFace, 2 * r)._1
-    val westTarget = explore(grid, westFace, 2 * r)._1
-    val eastTarget = explore(grid, eastFace, 2 * r)._1
-    val northwestTarget = explore(grid, northwestCorner, r - 1)._1
-    val northeastTarget = explore(grid, northeastCorner, r - 1)._1
-    val southwestTarget = explore(grid, southwestCorner, r - 1)._1
-    val southeastTarget = explore(grid, southeastCorner, r - 1)._1
+    val N = (distance - r) / grid.h
+    val T = fromEdge.map(_.size.toLong).sum
+    val A = fromEdges.map(_.size.toLong).sum
+    val B = fromCorner.map(_.size.toLong).sum
 
-    val nw = northTarget.union(westTarget)
-    val ne = northTarget.union(eastTarget)
-    val sw = southTarget.union(westTarget)
-    val se = southTarget.union(eastTarget)
-
-    val n = (distance - r) / w
-
-    // full exploration
-    var same = (n - 1) * (n - 1)
-    var diff = n * n
-    val fullExploration = same * sameParityFull + diff * diffParityFull
-
-    // partial exploration
-    val straight =
-      List(northTarget, southTarget, westTarget, eastTarget)
-        .map(_.size.toLong)
-        .sum
-
-    val corners =
-      List(northwestTarget, northeastTarget, southwestTarget, southeastTarget)
-        .map(_.size.toLong)
-        .sum * n
-
-    val diagonal =
-      List(nw, ne, sw, se)
-        .map(_.size.toLong * (n - 1))
-        .sum
-
-    fullExploration + diagonal + straight + corners
+    // https://www.reddit.com/r/adventofcode/comments/18o4y0m/2023_day_21_part_2_algebraic_solution_using_only/
+    List(
+      (N - 1) * (N - 1) * odd,
+      N * N * even,
+      (N - 1) * A,
+      N * B,
+      T
+    ).sum
   }
 
   def main(args: Array[String]): Unit = {
