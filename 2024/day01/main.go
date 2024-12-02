@@ -12,19 +12,19 @@ func main() {
 	filename := os.Args[1]
 	data, _ := os.ReadFile(filename)
 	lines := strings.Split(string(data), "\n")
-	left := make([]int, 0)
-	right := make([]int, 0)
+	left := make([]int, len(lines))
+	right := make([]int, len(lines))
 
-	for _, v := range lines {
+	for i, v := range lines {
 		nums := strings.Split(v, "   ")
 		num1, _ := strconv.Atoi(nums[0])
 		num2, _ := strconv.Atoi(nums[1])
-		left = append(left, num1)
-		right = append(right, num2)
+		left[i] = num1
+		right[i] = num2
 	}
 
-	sort.Sort(sort.IntSlice(left))
-	sort.Sort(sort.IntSlice(right))
+	sort.Ints(left)
+	sort.Ints(right)
 
 	part1 := 0
 	for i := range left {
@@ -37,14 +37,12 @@ func main() {
 	fmt.Println("Part 1:", part1)
 
 	part2 := 0
+	rightCounts := make(map[int]int)
+	for _, r := range right {
+		rightCounts[r]++
+	}
 	for _, l := range left {
-		count := 0
-		for _, r := range right {
-			if l == r {
-				count++
-			}
-		}
-		part2 += count * l
+		part2 += l * rightCounts[l]
 	}
 	fmt.Println("Part 2:", part2)
 }
