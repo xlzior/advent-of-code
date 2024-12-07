@@ -24,12 +24,12 @@ func (p *pair) TurnRight() pair {
 	return pair{p.c, -p.r}
 }
 
-func isWithinBounds(grid []string, p pair) bool {
-	return p.r >= 0 && p.r < len(grid) && p.c >= 0 && p.c < len(grid[0])
+func isWithinBounds(bottomRight pair, p pair) bool {
+	return p.r >= 0 && p.r < bottomRight.r && p.c >= 0 && p.c < bottomRight.c
 }
 
 func getCell(grid []string, p pair) string {
-	if !isWithinBounds(grid, p) {
+	if !isWithinBounds(pair{len(grid), len(grid[0])}, p) {
 		return ""
 	}
 	return string(grid[p.r][p.c])
@@ -47,70 +47,66 @@ func findCells(grid []string, char string) []pair {
 	return results
 }
 
-func moveGuard(grid []string, curr pair, dir pair) (pair, pair) {
+func moveGuard(obstacles map[pair]bool, curr pair, dir pair) (pair, pair) {
 	next := curr.Add(dir)
-	if getCell(grid, next) == "#" {
-		return moveGuard(grid, curr, dir.TurnRight())
+	if obstacles[next] {
+		return moveGuard(obstacles, curr, dir.TurnRight())
 	} else {
 		return next, dir
 	}
 }
 
-func replaceAtIndex(s string, k int, replacement rune) string {
-	if k < 0 || k >= len(s) {
-		return s
-	}
-
-	runes := []rune(s)
-	runes[k] = replacement
-
-	return string(runes)
-}
-
-func isLoop(grid []string, start pair) bool {
-	curr := start
-	dir := pair{-1, 0} // up
-
+func isLoop(obstacles map[pair]bool, bottomRight pair, curr pair, dir pair) bool {
 	visited := make(map[posdir]bool)
 
-	for isWithinBounds(grid, curr) {
-		curr, dir = moveGuard(grid, curr, dir)
+	for isWithinBounds(bottomRight, curr) {
 		if visited[posdir{curr, dir}] {
 			return true
 		}
-		visited[posdir{curr, dir}] = true
+		next, nextDir := moveGuard(obstacles, curr, dir)
+		if dir != nextDir {
+			visited[posdir{curr, dir}] = true
+		}
+		curr, dir = next, nextDir
 	}
 	return false
+}
+
+func Solve(grid []string) {
+	start := findCells(grid, "^")[0]
+	obstacles := make(map[pair]bool)
+	for _, obst := range findCells(grid, "#") {
+		obstacles[obst] = true
+	}
+	bottomRight := pair{len(grid), len(grid[0])}
+
+	visited := make(map[pair]bool)
+	loopCandidates := make(map[pair]bool)
+
+	curr := start
+	dir := pair{-1, 0} // up
+
+	for isWithinBounds(bottomRight, curr) {
+		visited[curr] = true
+		next, nextDir := moveGuard(obstacles, curr, dir)
+
+		if next != start && !visited[next] {
+			obstacles[next] = true
+			if isLoop(obstacles, bottomRight, curr, dir) {
+				loopCandidates[next] = true
+			}
+			obstacles[next] = false
+		}
+
+		curr, dir = next, nextDir
+	}
+	fmt.Println("Part 1:", len(visited))
+	fmt.Println("Part 2:", len(loopCandidates))
 }
 
 func main() {
 	filename := os.Args[1]
 	data, _ := os.ReadFile(filename)
 	grid := strings.Split(string(data), "\n")
-
-	visited := make(map[pair]bool)
-	dir := pair{-1, 0} // up
-
-	start := findCells(grid, "^")[0]
-	curr := start
-
-	for isWithinBounds(grid, curr) {
-		visited[curr] = true
-		curr, dir = moveGuard(grid, curr, dir)
-	}
-	fmt.Println("Part 1:", len(visited))
-
-	loopCandidates := make(map[pair]bool)
-	for candidate := range visited {
-		if candidate == start {
-			continue
-		}
-		newGrid := make([]string, len(grid))
-		copy(newGrid, grid)
-		newGrid[candidate.r] = replaceAtIndex(newGrid[candidate.r], candidate.c, '#')
-		if isLoop(newGrid, start) {
-			loopCandidates[candidate] = true
-		}
-	}
-	fmt.Println("Part 2:", len(loopCandidates))
+	Solve(grid)
 }
