@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
 func checkSafety(report []int) bool {
@@ -24,12 +25,10 @@ func checkSafety(report []int) bool {
 }
 
 func main() {
-	filename := os.Args[1]
-	data, _ := os.ReadFile(filename)
-	linesStr := strings.Split(string(data), "\n")
-	reports := make([][]int, len(linesStr))
+	lines := utils.ReadLines()
+	reports := make([][]int, len(lines))
 
-	for r, line := range linesStr {
+	for r, line := range lines {
 		splitted := strings.Split(line, " ")
 		levels := make([]int, len(splitted))
 		reports[r] = levels

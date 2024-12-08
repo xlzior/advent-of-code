@@ -2,16 +2,15 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
 func main() {
-	filename := os.Args[1]
-	data, _ := os.ReadFile(filename)
-	lines := strings.Split(string(data), "\n")
+	lines := utils.ReadLines()
 	left := make([]int, len(lines))
 	right := make([]int, len(lines))
 

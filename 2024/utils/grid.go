@@ -5,7 +5,15 @@ type Grid struct {
 }
 
 func (g *Grid) GetBottomRight() Pair {
-	return Pair{len(g.Grid), len(g.Grid[0])}
+	return Pair{g.NumRows(), g.NumCols()}
+}
+
+func (g *Grid) NumRows() int {
+	return len(g.Grid)
+}
+
+func (g *Grid) NumCols() int {
+	return len(g.Grid[0])
 }
 
 func (g *Grid) Contains(p Pair) bool {

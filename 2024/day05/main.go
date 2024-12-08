@@ -6,20 +6,17 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
-type pair struct {
-	r int
-	c int
-}
-
-func parseRules(data []string) map[pair]bool {
-	parsed := make(map[pair]bool, len(data))
+func parseRules(data []string) map[utils.Pair]bool {
+	parsed := make(map[utils.Pair]bool, len(data))
 	for _, rule := range data {
 		pages := strings.Split(rule, "|")
 		a, _ := strconv.Atoi(pages[0])
 		b, _ := strconv.Atoi(pages[1])
-		parsed[pair{a, b}] = true
+		parsed[utils.Pair{R: a, C: b}] = true
 	}
 	return parsed
 }
@@ -38,10 +35,10 @@ func parseUpdates(data []string) [][]int {
 	return updates
 }
 
-func isCorrect(rules map[pair]bool, update []int) bool {
+func isCorrect(rules map[utils.Pair]bool, update []int) bool {
 	for i := 0; i < len(update); i++ {
 		for j := i + 1; j < len(update); j++ {
-			if rules[pair{update[j], update[i]}] {
+			if rules[utils.Pair{R: update[j], C: update[i]}] {
 				return false
 			}
 		}
@@ -49,11 +46,11 @@ func isCorrect(rules map[pair]bool, update []int) bool {
 	return true
 }
 
-func reorder(rules map[pair]bool, update []int) []int {
+func reorder(rules map[utils.Pair]bool, update []int) []int {
 	sorted := make([]int, len(update))
 	copy(sorted, update)
 	sort.Slice(sorted, func(i, j int) bool {
-		return rules[pair{sorted[i], sorted[j]}]
+		return rules[utils.Pair{R: sorted[i], C: sorted[j]}]
 	})
 	return sorted
 }

@@ -2,70 +2,47 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
-type pair struct {
-	r int
-	c int
+func containsXMAS(grid utils.Grid, start utils.Pair, dir utils.Pair) bool {
+	return grid.GetCell(start.Plus(dir.Times(0))) == 'X' &&
+		grid.GetCell(start.Plus(dir.Times(1))) == 'M' &&
+		grid.GetCell(start.Plus(dir.Times(2))) == 'A' &&
+		grid.GetCell(start.Plus(dir.Times(3))) == 'S'
 }
 
-func (p1 *pair) Add(p2 pair) pair {
-	return pair{p1.r + p2.r, p1.c + p2.c}
-}
-
-func (p1 *pair) Times(n int) pair {
-	return pair{p1.r * n, p1.c * n}
-}
-
-func getCell(grid []string, coords pair) string {
-	if coords.r < 0 || coords.r >= len(grid) ||
-		coords.c < 0 || coords.c >= len(grid[0]) {
-		return ""
-	}
-
-	return string(grid[coords.r][coords.c])
-}
-
-func containsXMAS(grid []string, start pair, dir pair) bool {
-	return getCell(grid, start.Add(dir.Times(0))) == "X" &&
-		getCell(grid, start.Add(dir.Times(1))) == "M" &&
-		getCell(grid, start.Add(dir.Times(2))) == "A" &&
-		getCell(grid, start.Add(dir.Times(3))) == "S"
-}
-
-func containsCrossMAS(grid []string, start pair, dir pair) bool {
-	dir2 := pair{-dir.c, dir.r}
-	return getCell(grid, start) == "A" &&
-		getCell(grid, start.Add(dir.Times(1))) == "M" &&
-		getCell(grid, start.Add(dir.Times(-1))) == "S" &&
-		getCell(grid, start.Add(dir2.Times(1))) == "M" &&
-		getCell(grid, start.Add(dir2.Times(-1))) == "S"
+func containsCrossMAS(grid utils.Grid, start utils.Pair, dir utils.Pair) bool {
+	dir2 := utils.Pair{R: -dir.C, C: dir.R}
+	return grid.GetCell(start) == 'A' &&
+		grid.GetCell(start.Plus(dir.Times(1))) == 'M' &&
+		grid.GetCell(start.Plus(dir.Times(-1))) == 'S' &&
+		grid.GetCell(start.Plus(dir2.Times(1))) == 'M' &&
+		grid.GetCell(start.Plus(dir2.Times(-1))) == 'S'
 }
 
 func main() {
-	filename := os.Args[1]
-	data, _ := os.ReadFile(filename)
-	grid := strings.Split(string(data), "\n")
+	lines := utils.ReadLines()
+	grid := utils.Grid{Grid: lines}
 
-	var nsew = []pair{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}
-	var diagonals = []pair{{-1, 1}, {-1, -1}, {1, 1}, {1, -1}}
-	var allDirections = []pair{}
+	var nsew = []utils.Pair{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}
+	var diagonals = []utils.Pair{{-1, 1}, {-1, -1}, {1, 1}, {1, -1}}
+	var allDirections = []utils.Pair{}
 	allDirections = append(allDirections, nsew...)
 	allDirections = append(allDirections, diagonals...)
 
 	part1 := 0
 	part2 := 0
-	for i := 0; i < len(grid); i++ {
-		for j := 0; j < len(grid[0]); j++ {
+	for i := 0; i < grid.NumRows(); i++ {
+		for j := 0; j < grid.NumCols(); j++ {
 			for _, dir := range allDirections {
-				if containsXMAS(grid, pair{i, j}, dir) {
+				if containsXMAS(grid, utils.Pair{R: i, C: j}, dir) {
 					part1++
 				}
 			}
 			for _, dir := range diagonals {
-				if containsCrossMAS(grid, pair{i, j}, dir) {
+				if containsCrossMAS(grid, utils.Pair{R: i, C: j}, dir) {
 					part2++
 				}
 			}

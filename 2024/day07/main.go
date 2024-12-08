@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
 func parseInput(lines []string) [][]int {
@@ -59,9 +60,7 @@ func evaluate(curr int, nums []int, target int, fns []Operation) bool {
 }
 
 func main() {
-	filename := os.Args[1]
-	data, _ := os.ReadFile(filename)
-	lines := parseInput(strings.Split(string(data), "\n"))
+	lines := parseInput(utils.ReadLines())
 
 	part1 := 0
 	part2 := 0

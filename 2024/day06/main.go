@@ -2,53 +2,17 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
-type pair struct {
-	r int
-	c int
-}
-
 type posdir struct {
-	position  pair
-	direction pair
+	position  utils.Pair
+	direction utils.Pair
 }
 
-func (p1 *pair) Add(p2 pair) pair {
-	return pair{p1.r + p2.r, p1.c + p2.c}
-}
-
-func (p *pair) TurnRight() pair {
-	return pair{p.c, -p.r}
-}
-
-func isWithinBounds(bottomRight pair, p pair) bool {
-	return p.r >= 0 && p.r < bottomRight.r && p.c >= 0 && p.c < bottomRight.c
-}
-
-func getCell(grid []string, p pair) string {
-	if !isWithinBounds(pair{len(grid), len(grid[0])}, p) {
-		return ""
-	}
-	return string(grid[p.r][p.c])
-}
-
-func findCells(grid []string, char string) []pair {
-	results := make([]pair, 0)
-	for r := 0; r < len(grid); r++ {
-		for c := 0; c < len(grid[0]); c++ {
-			if getCell(grid, pair{r, c}) == char {
-				results = append(results, pair{r, c})
-			}
-		}
-	}
-	return results
-}
-
-func moveGuard(obstacles map[pair]bool, curr pair, dir pair) (pair, pair) {
-	next := curr.Add(dir)
+func moveGuard(obstacles map[utils.Pair]bool, curr utils.Pair, dir utils.Pair) (utils.Pair, utils.Pair) {
+	next := curr.Plus(dir)
 	if obstacles[next] {
 		return moveGuard(obstacles, curr, dir.TurnRight())
 	} else {
@@ -56,10 +20,10 @@ func moveGuard(obstacles map[pair]bool, curr pair, dir pair) (pair, pair) {
 	}
 }
 
-func isLoop(obstacles map[pair]bool, bottomRight pair, curr pair, dir pair) bool {
+func isLoop(grid utils.Grid, obstacles map[utils.Pair]bool, curr utils.Pair, dir utils.Pair) bool {
 	visited := make(map[posdir]bool)
 
-	for isWithinBounds(bottomRight, curr) {
+	for grid.Contains(curr) {
 		if visited[posdir{curr, dir}] {
 			return true
 		}
@@ -72,27 +36,26 @@ func isLoop(obstacles map[pair]bool, bottomRight pair, curr pair, dir pair) bool
 	return false
 }
 
-func Solve(grid []string) {
-	start := findCells(grid, "^")[0]
-	obstacles := make(map[pair]bool)
-	for _, obst := range findCells(grid, "#") {
+func Solve(grid utils.Grid) {
+	start := grid.FindAll('^')[0]
+	obstacles := make(map[utils.Pair]bool)
+	for _, obst := range grid.FindAll('#') {
 		obstacles[obst] = true
 	}
-	bottomRight := pair{len(grid), len(grid[0])}
 
-	visited := make(map[pair]bool)
-	loopCandidates := make(map[pair]bool)
+	visited := make(map[utils.Pair]bool)
+	loopCandidates := make(map[utils.Pair]bool)
 
 	curr := start
-	dir := pair{-1, 0} // up
+	dir := utils.Pair{R: -1, C: 0} // up
 
-	for isWithinBounds(bottomRight, curr) {
+	for grid.Contains(curr) {
 		visited[curr] = true
 		next, nextDir := moveGuard(obstacles, curr, dir)
 
 		if next != start && !visited[next] {
 			obstacles[next] = true
-			if isLoop(obstacles, bottomRight, curr, dir) {
+			if isLoop(grid, obstacles, curr, dir) {
 				loopCandidates[next] = true
 			}
 			obstacles[next] = false
@@ -105,8 +68,7 @@ func Solve(grid []string) {
 }
 
 func main() {
-	filename := os.Args[1]
-	data, _ := os.ReadFile(filename)
-	grid := strings.Split(string(data), "\n")
+	lines := utils.ReadLines()
+	grid := utils.Grid{Grid: lines}
 	Solve(grid)
 }

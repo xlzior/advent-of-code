@@ -20,3 +20,7 @@ func (p *Pair) Times(n int) Pair {
 func (p *Pair) Divide(n int) Pair {
 	return Pair{p.R / n, p.C / n}
 }
+
+func (p *Pair) TurnRight() Pair {
+	return Pair{p.C, -p.R}
+}
