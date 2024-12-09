@@ -50,9 +50,59 @@ func solvePart1(line string) int {
 	return part1
 }
 
+func parseInput(line string) ([][3]int, [][2]int) {
+	blocks := make([][3]int, 0) // {index, id, length}
+	spaces := make([][2]int, 0) // {index, length}
+	j := 0
+	for i := 0; i < len(line); i += 2 {
+		blockSize, _ := strconv.Atoi(string(line[i]))
+		blocks = append(blocks, [3]int{j, i / 2, blockSize})
+		j += blockSize
+
+		if i+1 < len(line) {
+			spaceSize, _ := strconv.Atoi(string(line[i+1]))
+			spaces = append(spaces, [2]int{j, spaceSize})
+			j += spaceSize
+		}
+	}
+	return blocks, spaces
+}
+
+func findFirstFreeSpace(spaces [][2]int, length int) int {
+	for i, s := range spaces {
+		if length <= s[1] {
+			return i
+		}
+	}
+	return -1
+}
+
+func solvePart2(line string) int {
+	blocks, spaces := parseInput(line)
+	for i := len(blocks) - 1; i >= 0; i-- {
+		s := findFirstFreeSpace(spaces, blocks[i][2])
+		if s >= 0 && spaces[s][0] < blocks[i][0] {
+			spaces[s][1] -= blocks[i][2] // decrement space left
+			blocks[i][0] = spaces[s][0]  // set block start index
+			spaces[s][0] += blocks[i][2] // increment space start index
+		}
+	}
+	part2 := 0
+	for _, block := range blocks {
+		i, id, length := block[0], block[1], block[2]
+		for j := 0; j < length; j++ {
+			part2 += id * (i + j)
+		}
+	}
+	return part2
+}
+
 func main() {
 	line := utils.ReadLines()[0]
 
 	part1 := solvePart1(line)
 	fmt.Println("Part 1:", part1)
+
+	part2 := solvePart2(line)
+	fmt.Println("Part 2:", part2)
 }
