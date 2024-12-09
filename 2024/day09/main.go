@@ -7,7 +7,7 @@ import (
 	"github.com/xlzior/aoc2024/utils"
 )
 
-func solvePart1(line string) int {
+func SolvePart1(line string) int {
 	part1 := 0
 	i := 0
 	left := 0
@@ -77,7 +77,7 @@ func findFirstFreeSpace(spaces [][2]int, length int) int {
 	return -1
 }
 
-func solvePart2(line string) int {
+func SolvePart2(line string) int {
 	blocks, spaces := parseInput(line)
 	for i := len(blocks) - 1; i >= 0; i-- {
 		s := findFirstFreeSpace(spaces, blocks[i][2])
@@ -100,9 +100,9 @@ func solvePart2(line string) int {
 func main() {
 	line := utils.ReadLines()[0]
 
-	part1 := solvePart1(line)
+	part1 := SolvePart1(line)
 	fmt.Println("Part 1:", part1)
 
-	part2 := solvePart2(line)
+	part2 := SolvePart2(line)
 	fmt.Println("Part 2:", part2)
 }
