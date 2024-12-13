@@ -8,35 +8,30 @@ import (
 	"github.com/xlzior/aoc2024/utils"
 )
 
+var cache map[[2]int]int
+
 func countDescendants(stone int, generations int) int {
-	cache := make(map[[2]int]int)
-	var helper func(int, int) int
-
-	helper = func(s int, g int) int {
-		cachedResult := cache[[2]int{s, g}]
-		if cachedResult > 0 {
-			return cachedResult
-		}
-
-		var result int
-		if g == 0 {
-			result = 1
-		} else if s == 0 {
-			result = helper(1, g-1)
-		} else if len(fmt.Sprint(s))%2 == 0 {
-			str := fmt.Sprint(s)
-			l := len(str)
-			a, _ := strconv.Atoi(str[:l/2])
-			b, _ := strconv.Atoi(str[l/2:])
-			result = helper(a, g-1) + helper(b, g-1)
-		} else {
-			result = helper(s*2024, g-1)
-		}
-		cache[[2]int{s, g}] = result
-		return result
+	cachedResult := cache[[2]int{stone, generations}]
+	if cachedResult > 0 {
+		return cachedResult
 	}
 
-	return helper(stone, generations)
+	var result int
+	if generations == 0 {
+		result = 1
+	} else if stone == 0 {
+		result = countDescendants(1, generations-1)
+	} else if len(fmt.Sprint(stone))%2 == 0 {
+		str := fmt.Sprint(stone)
+		l := len(str)
+		a, _ := strconv.Atoi(str[:l/2])
+		b, _ := strconv.Atoi(str[l/2:])
+		result = countDescendants(a, generations-1) + countDescendants(b, generations-1)
+	} else {
+		result = countDescendants(stone*2024, generations-1)
+	}
+	cache[[2]int{stone, generations}] = result
+	return result
 }
 
 func main() {
@@ -44,6 +39,7 @@ func main() {
 
 	part1 := 0
 	part2 := 0
+	cache = make(map[[2]int]int)
 	for _, num := range strings.Split(line, " ") {
 		n, _ := strconv.Atoi(num)
 		part1 += countDescendants(n, 25)
