@@ -17,3 +17,7 @@ puzzle.out
 .metals/
 
 .venv/
+
+# AoC tiles
+.aoc_tiles/*
+!.aoc_tiles/tiles/
