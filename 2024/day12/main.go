@@ -29,15 +29,15 @@ func head(m map[utils.Pair]bool) utils.Pair {
 func countConnectedComponents(nodes map[utils.Pair]bool) int {
 	count := 0
 	for len(nodes) > 0 {
-		component := []utils.Pair{head(nodes)}
-		for len(component) > 0 {
-			curr := component[0]
-			component = component[1:]
+		comp := []utils.Pair{head(nodes)}
+		for len(comp) > 0 {
+			curr := comp[0]
+			comp = comp[1:]
 			delete(nodes, curr)
 			for _, dir := range nsew {
 				next := curr.Plus(dir)
 				if nodes[next] {
-					component = append(component, next)
+					comp = append(comp, next)
 				}
 			}
 		}
@@ -54,18 +54,16 @@ func solve(grid utils.Grid) (int, int) {
 	for len(todo) > 0 {
 		p := head(todo)
 		plant := grid.GetCell(p)
-		area := 0
+		plot := make(map[utils.Pair]bool)
 		perimeter := make(map[utils.Pair]map[utils.Pair]bool)
 
-		visited := make(map[utils.Pair]bool)
 		neighbours := []utils.Pair{p}
 		for len(neighbours) > 0 {
 			curr := neighbours[0]
 			neighbours = neighbours[1:]
-			if grid.GetCell(curr) == plant && !visited[curr] {
-				visited[curr] = true
+			if grid.GetCell(curr) == plant && !plot[curr] {
+				plot[curr] = true
 				delete(todo, curr)
-				area++
 				for _, dir := range nsew {
 					next := curr.Plus(dir)
 					if grid.GetCell(next) != plant {
@@ -73,18 +71,18 @@ func solve(grid utils.Grid) (int, int) {
 							perimeter[dir] = make(map[utils.Pair]bool)
 						}
 						perimeter[dir][next] = true
-					} else if !visited[next] {
+					} else if !plot[next] {
 						neighbours = append(neighbours, next)
 					}
 				}
 			}
 		}
+		area := len(plot)
 		fences := 0
 		sides := 0
 		for dir := range perimeter {
-			dirFences := perimeter[dir]
-			fences += len(dirFences)
-			sides += countConnectedComponents(dirFences)
+			fences += len(perimeter[dir])
+			sides += countConnectedComponents(perimeter[dir])
 		}
 		part1 += area * fences
 		part2 += area * sides

@@ -2,20 +2,27 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/xlzior/aoc2024/utils"
 )
 
-func SolvePart1(line string) int {
+func stringToInts(line string) []int {
+	ints := make([]int, len(line))
+	for i, c := range line {
+		ints[i] = utils.MustParseInt(string(c))
+	}
+	return ints
+}
+
+func solvePart1(line []int) int {
 	part1 := 0
 	i := 0
 	left := 0
 	right := len(line) - 1
-	r, _ := strconv.Atoi(string(line[right]))
+	r := line[right]
 	for left < right {
 		// consume left block
-		l, _ := strconv.Atoi(string(line[left]))
+		l := line[left]
 		for l > 0 {
 			part1 += left / 2 * i
 			i++
@@ -24,7 +31,7 @@ func SolvePart1(line string) int {
 		left++
 
 		// consume right block until left free space gone
-		l, _ = strconv.Atoi(string(line[left]))
+		l = line[left]
 		for l > 0 {
 			part1 += right / 2 * i
 			i++
@@ -37,7 +44,7 @@ func SolvePart1(line string) int {
 					// ran out of right blocks, excess left free space not used
 					break
 				}
-				r, _ = strconv.Atoi(string(line[right]))
+				r = line[right]
 			}
 		}
 		left++
@@ -50,17 +57,17 @@ func SolvePart1(line string) int {
 	return part1
 }
 
-func parseInput(line string) ([][3]int, [][2]int) {
+func splitBlocksAndSpaces(line []int) ([][3]int, [][2]int) {
 	blocks := make([][3]int, 0) // {index, id, length}
 	spaces := make([][2]int, 0) // {index, length}
 	j := 0
 	for i := 0; i < len(line); i += 2 {
-		blockSize, _ := strconv.Atoi(string(line[i]))
+		blockSize := line[i]
 		blocks = append(blocks, [3]int{j, i / 2, blockSize})
 		j += blockSize
 
 		if i+1 < len(line) {
-			spaceSize, _ := strconv.Atoi(string(line[i+1]))
+			spaceSize := line[i+1]
 			spaces = append(spaces, [2]int{j, spaceSize})
 			j += spaceSize
 		}
@@ -77,8 +84,8 @@ func findFirstFreeSpace(spaces [][2]int, length int) int {
 	return -1
 }
 
-func SolvePart2(line string) int {
-	blocks, spaces := parseInput(line)
+func solvePart2(line []int) int {
+	blocks, spaces := splitBlocksAndSpaces(line)
 	for i := len(blocks) - 1; i >= 0; i-- {
 		s := findFirstFreeSpace(spaces, blocks[i][2])
 		if s >= 0 && spaces[s][0] < blocks[i][0] {
@@ -99,10 +106,11 @@ func SolvePart2(line string) int {
 
 func main() {
 	line := utils.ReadLines()[0]
+	ints := stringToInts(line)
 
-	part1 := SolvePart1(line)
+	part1 := solvePart1(ints)
 	fmt.Println("Part 1:", part1)
 
-	part2 := SolvePart2(line)
+	part2 := solvePart2(ints)
 	fmt.Println("Part 2:", part2)
 }

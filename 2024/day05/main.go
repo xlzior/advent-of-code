@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/xlzior/aoc2024/utils"
@@ -14,8 +13,8 @@ func parseRules(data []string) map[utils.Pair]bool {
 	parsed := make(map[utils.Pair]bool, len(data))
 	for _, rule := range data {
 		pages := strings.Split(rule, "|")
-		a, _ := strconv.Atoi(pages[0])
-		b, _ := strconv.Atoi(pages[1])
+		a := utils.MustParseInt(pages[0])
+		b := utils.MustParseInt(pages[1])
 		parsed[utils.Pair{R: a, C: b}] = true
 	}
 	return parsed
@@ -27,8 +26,7 @@ func parseUpdates(data []string) [][]int {
 		pages := strings.Split(rawUpdate, ",")
 		update := make([]int, len(pages))
 		for j, page := range pages {
-			p, _ := strconv.Atoi(page)
-			update[j] = p
+			update[j] = utils.MustParseInt(page)
 		}
 		updates[i] = update
 	}

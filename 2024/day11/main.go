@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/xlzior/aoc2024/utils"
@@ -24,8 +23,8 @@ func countDescendants(stone int, generations int) int {
 	} else if len(fmt.Sprint(stone))%2 == 0 {
 		str := fmt.Sprint(stone)
 		l := len(str)
-		a, _ := strconv.Atoi(str[:l/2])
-		b, _ := strconv.Atoi(str[l/2:])
+		a := utils.MustParseInt(str[:l/2])
+		b := utils.MustParseInt(str[l/2:])
 		result = countDescendants(a, generations-1) + countDescendants(b, generations-1)
 	} else {
 		result = countDescendants(stone*2024, generations-1)
@@ -41,7 +40,7 @@ func main() {
 	part2 := 0
 	cache = make(map[[2]int]int)
 	for _, num := range strings.Split(line, " ") {
-		n, _ := strconv.Atoi(num)
+		n := utils.MustParseInt(num)
 		part1 += countDescendants(n, 25)
 		part2 += countDescendants(n, 75)
 	}

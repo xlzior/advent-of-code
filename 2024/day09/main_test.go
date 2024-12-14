@@ -11,8 +11,9 @@ func Benchmark(b *testing.B) {
 	// u/Standard_Bar8402
 	data, _ := os.ReadFile("4.in")
 	line := strings.Split(string(data), "\n")[0]
+	ints := stringToInts(line)
 
 	for i := 0; i < b.N; i++ {
-		SolvePart2(line)
+		solvePart2(ints)
 	}
 }

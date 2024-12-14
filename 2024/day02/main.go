@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/xlzior/aoc2024/utils"
@@ -33,7 +32,7 @@ func main() {
 		levels := make([]int, len(splitted))
 		reports[r] = levels
 		for c, n := range splitted {
-			level, _ := strconv.Atoi(n)
+			level := utils.MustParseInt(n)
 			reports[r][c] = level
 		}
 	}

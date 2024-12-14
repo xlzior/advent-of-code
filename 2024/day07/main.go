@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	"github.com/xlzior/aoc2024/utils"
@@ -21,8 +20,7 @@ func parseLine(line string) []int {
 	rawNums := strings.Split(strings.Replace(line, ":", "", 1), " ")
 	nums := make([]int, len(rawNums))
 	for i, num := range rawNums {
-		n, _ := strconv.Atoi(num)
-		nums[i] = n
+		nums[i] = utils.MustParseInt(num)
 	}
 	return nums
 }

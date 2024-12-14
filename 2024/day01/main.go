@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/xlzior/aoc2024/utils"
@@ -16,10 +15,8 @@ func main() {
 
 	for i, v := range lines {
 		nums := strings.Split(v, "   ")
-		num1, _ := strconv.Atoi(nums[0])
-		num2, _ := strconv.Atoi(nums[1])
-		left[i] = num1
-		right[i] = num2
+		left[i] = utils.MustParseInt(nums[0])
+		right[i] = utils.MustParseInt(nums[1])
 	}
 
 	sort.Ints(left)

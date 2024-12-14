@@ -3,34 +3,26 @@ package main
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 
 	"github.com/xlzior/aoc2024/utils"
 )
 
+func divmod(a, b int) (int, int) {
+	return a / b, a % b
+}
+
 func solve(ax, bx, tx, ay, by, ty int) (int, int, bool) {
-	numer := ty*ax - tx*ay
-	denom := by*ax - bx*ay
-	if numer%denom != 0 {
-		return 0, 0, false
-	}
-	b := numer / denom
-
-	numer = tx - b*bx
-	denom = ax
-	if numer%denom != 0 {
-		return 0, 0, false
-	}
-	a := numer / denom
-
-	return a, b, true
+	b, bmod := divmod(ty*ax-tx*ay, by*ax-bx*ay)
+	a, amod := divmod(tx-b*bx, ax)
+	solveable := amod == 0 && bmod == 0
+	return a, b, solveable
 }
 
 func extractNums(s string) (int, int) {
 	numsRegex := regexp.MustCompile(`\d+`)
 	input := numsRegex.FindAllString(s, 2)
-	first, _ := strconv.Atoi(input[0])
-	second, _ := strconv.Atoi(input[1])
+	first := utils.MustParseInt(input[0])
+	second := utils.MustParseInt(input[1])
 	return first, second
 }
 

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
+
+	"github.com/xlzior/aoc2024/utils"
 )
 
 func main() {
@@ -17,8 +18,8 @@ func main() {
 
 	part1 := 0
 	for _, match := range mulRegex.FindAllStringSubmatch(s, -1) {
-		a, _ := strconv.Atoi(match[mulRegex.SubexpIndex("a")])
-		b, _ := strconv.Atoi(match[mulRegex.SubexpIndex("b")])
+		a := utils.MustParseInt(match[mulRegex.SubexpIndex("a")])
+		b := utils.MustParseInt(match[mulRegex.SubexpIndex("b")])
 		part1 += a * b
 	}
 	fmt.Println("Part 1:", part1)
@@ -31,8 +32,8 @@ func main() {
 		} else if match[0] == "do()" {
 			isOn = true
 		} else if strings.HasPrefix(match[0], "mul") && isOn {
-			a, _ := strconv.Atoi(match[mulRegex.SubexpIndex("a")])
-			b, _ := strconv.Atoi(match[mulRegex.SubexpIndex("b")])
+			a := utils.MustParseInt(match[mulRegex.SubexpIndex("a")])
+			b := utils.MustParseInt(match[mulRegex.SubexpIndex("b")])
 			part2 += a * b
 		}
 	}
