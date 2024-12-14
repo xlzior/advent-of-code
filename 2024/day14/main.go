@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/xlzior/aoc2024/utils"
 )
@@ -25,25 +26,62 @@ func extractNums(s string, n int) []int {
 	return nums
 }
 
-func solvePart1(robots [][2]utils.Pair, size utils.Pair) int {
-	quadrants := make(map[utils.Pair][]utils.Pair)
-
+func simulate(robots [][2]utils.Pair, n int, size utils.Pair) map[utils.Pair]int {
+	positions := make(map[utils.Pair]int)
 	for _, robot := range robots {
 		p := robot[0]
 		v := robot[1]
-		f := p.Plus(v.Times(100)).Mod(size).Plus(size).Mod(size)
-		q := f.Times(2).Plus(utils.Pair{R: 1, C: 1}).Minus(size)
+		f := p.Plus(v.Times(n)).Mod(size).Plus(size).Mod(size)
+		positions[f]++
+	}
+	return positions
+}
+
+func solvePart1(robots [][2]utils.Pair, size utils.Pair) int {
+	quadrants := make(map[utils.Pair]int)
+	positions := simulate(robots, 100, size)
+
+	for pos, count := range positions {
+		q := pos.Times(2).Plus(utils.Pair{R: 1, C: 1}).Minus(size)
 		if q.R != 0 && q.C != 0 {
 			q.R = q.R / int(math.Abs(float64(q.R)))
 			q.C = q.C / int(math.Abs(float64(q.C)))
-			quadrants[q] = append(quadrants[q], f)
+			quadrants[q] += count
 		}
 	}
+
 	part1 := 1
-	for q := range quadrants {
-		part1 *= len(quadrants[q])
+	for _, q := range quadrants {
+		part1 *= q
 	}
 	return part1
+}
+
+func snapshot(positions map[utils.Pair]int, size utils.Pair) string {
+	picture := ""
+	for i := 0; i < size.R; i++ {
+		s := ""
+		for j := 0; j < size.C; j++ {
+			if positions[utils.Pair{R: i, C: j}] > 0 {
+				s += "#"
+			} else {
+				s += " "
+			}
+		}
+		picture += s + "\n"
+	}
+	return picture
+}
+
+func part2helper(robots [][2]utils.Pair, size utils.Pair, until int, step int) {
+	for i := 1; i < until; i += step {
+		positions := simulate(robots, i, size)
+		picture := snapshot(positions, size)
+		f, _ := os.Create("snapshots/" + fmt.Sprint(i) + ".out")
+		f.WriteString(picture)
+		f.Sync()
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func main() {
@@ -64,4 +102,11 @@ func main() {
 	}
 	part1 := solvePart1(robots, size)
 	fmt.Println("Part 1:", part1)
+
+	for i := 1; true; i += 103 {
+		if (i-46)%101 == 0 {
+			fmt.Println("Part 2:", i)
+			break
+		}
+	}
 }
