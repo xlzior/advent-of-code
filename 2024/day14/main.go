@@ -5,7 +5,6 @@ import (
 	"math"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/xlzior/aoc2024/utils"
 )
@@ -37,7 +36,7 @@ func simulate(robots [][2]utils.Pair, n int, size utils.Pair) map[utils.Pair]int
 	return positions
 }
 
-func solvePart1(robots [][2]utils.Pair, size utils.Pair) int {
+func getSafetyScore(robots [][2]utils.Pair, size utils.Pair) int {
 	quadrants := make(map[utils.Pair]int)
 	positions := simulate(robots, 100, size)
 
@@ -57,33 +56,6 @@ func solvePart1(robots [][2]utils.Pair, size utils.Pair) int {
 	return part1
 }
 
-func snapshot(positions map[utils.Pair]int, size utils.Pair) string {
-	picture := ""
-	for i := 0; i < size.R; i++ {
-		s := ""
-		for j := 0; j < size.C; j++ {
-			if positions[utils.Pair{R: i, C: j}] > 0 {
-				s += "#"
-			} else {
-				s += " "
-			}
-		}
-		picture += s + "\n"
-	}
-	return picture
-}
-
-func part2helper(robots [][2]utils.Pair, size utils.Pair, until int, step int) {
-	for i := 1; i < until; i += step {
-		positions := simulate(robots, i, size)
-		picture := snapshot(positions, size)
-		f, _ := os.Create("snapshots/" + fmt.Sprint(i) + ".out")
-		f.WriteString(picture)
-		f.Sync()
-		time.Sleep(500 * time.Millisecond)
-	}
-}
-
 func main() {
 	lines := utils.ReadLines()
 	size := utils.Pair{R: 7, C: 11}
@@ -100,8 +72,11 @@ func main() {
 		v := utils.Pair{R: vy, C: vx}
 		robots = append(robots, [2]utils.Pair{p, v})
 	}
-	part1 := solvePart1(robots, size)
+	part1 := getSafetyScore(robots, size)
 	fmt.Println("Part 1:", part1)
+
+	part2 := findChristmasTree(robots, size)
+	fmt.Println("Part 2:", part2)
 
 	for i := 1; true; i += 103 {
 		if (i-46)%101 == 0 {
