@@ -37,7 +37,7 @@ func main() {
 
 	part1 := 0
 	part2 := 0
-	for _, start := range grid.FindAll('0') {
+	for _, start := range grid.FindAllList('0') {
 		p1, p2 := countTrails(grid, start)
 		part1 += p1
 		part2 += p2

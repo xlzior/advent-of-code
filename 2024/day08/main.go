@@ -33,7 +33,7 @@ func main() {
 		if r == '.' {
 			continue
 		}
-		antennas := grid.FindAll(r)
+		antennas := grid.FindAllList(r)
 		for _, a := range antennas {
 			for _, b := range antennas {
 				if a == b {

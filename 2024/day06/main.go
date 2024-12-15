@@ -37,9 +37,9 @@ func isLoop(grid utils.Grid, obstacles map[utils.Pair]bool, curr utils.Pair, dir
 }
 
 func Solve(grid utils.Grid) {
-	start := grid.FindAll('^')[0]
+	start := grid.FindAllList('^')[0]
 	obstacles := make(map[utils.Pair]bool)
-	for _, obst := range grid.FindAll('#') {
+	for _, obst := range grid.FindAllList('#') {
 		obstacles[obst] = true
 	}
 

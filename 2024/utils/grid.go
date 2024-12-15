@@ -44,13 +44,26 @@ func (g *Grid) Print() {
 	}
 }
 
-func (g *Grid) FindAll(char rune) []Pair {
+func (g *Grid) FindAllList(char rune) []Pair {
 	results := make([]Pair, 0)
 	br := g.GetBottomRight()
 	for r := 0; r < br.R; r++ {
 		for c := 0; c < br.C; c++ {
 			if g.GetCell(Pair{r, c}) == char {
 				results = append(results, Pair{r, c})
+			}
+		}
+	}
+	return results
+}
+
+func (g *Grid) FindAllSet(char rune) map[Pair]bool {
+	results := make(map[Pair]bool, 0)
+	br := g.GetBottomRight()
+	for r := 0; r < br.R; r++ {
+		for c := 0; c < br.C; c++ {
+			if g.GetCell(Pair{r, c}) == char {
+				results[Pair{r, c}] = true
 			}
 		}
 	}
