@@ -14,6 +14,13 @@ func ReadLines() []string {
 	return lines
 }
 
+func ReadSections() []string {
+	filename := os.Args[1]
+	data, _ := os.ReadFile(filename)
+	lines := strings.Split(string(data), "\n\n")
+	return lines
+}
+
 func MustParseInt(s string) int {
 	n, err := strconv.Atoi(s)
 	if err != nil {

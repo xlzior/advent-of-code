@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 type Grid struct {
 	Grid []string
 }
@@ -26,6 +28,20 @@ func (g *Grid) GetCell(p Pair) rune {
 		return '\u0000'
 	}
 	return rune(g.Grid[p.R][p.C])
+}
+
+func (g *Grid) SetCell(p Pair, r rune) {
+	if g.Contains(p) {
+		row := []rune(g.Grid[p.R])
+		row[p.C] = r
+		g.Grid[p.R] = string(row)
+	}
+}
+
+func (g *Grid) Print() {
+	for _, row := range g.Grid {
+		fmt.Println(row)
+	}
 }
 
 func (g *Grid) FindAll(char rune) []Pair {
