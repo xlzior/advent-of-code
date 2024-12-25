@@ -1,9 +1,9 @@
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  Advent of Code - 307/480 ⭐
+  Advent of Code - 309/500 ⭐
 </h1>
 <h1 align="center">
-  2024 - 29 ⭐ - Go
+  2024 - 31 ⭐ - Go
 </h1>
 <a href="2024/day01/main.go">
   <img src=".aoc_tiles/tiles/2024/01.png" width="161px">
@@ -49,6 +49,27 @@
 </a>
 <a href="2024/day15/main.go">
   <img src=".aoc_tiles/tiles/2024/15.png" width="161px">
+</a>
+<a href="None">
+  <img src=".aoc_tiles/tiles/2024/16.png" width="161px">
+</a>
+<a href="None">
+  <img src=".aoc_tiles/tiles/2024/17.png" width="161px">
+</a>
+<a href="None">
+  <img src=".aoc_tiles/tiles/2024/18.png" width="161px">
+</a>
+<a href="None">
+  <img src=".aoc_tiles/tiles/2024/19.png" width="161px">
+</a>
+<a href="None">
+  <img src=".aoc_tiles/tiles/2024/20.png" width="161px">
+</a>
+<a href="None">
+  <img src=".aoc_tiles/tiles/2024/21.png" width="161px">
+</a>
+<a href="2024/day22/main.go">
+  <img src=".aoc_tiles/tiles/2024/22.png" width="161px">
 </a>
 <h1 align="center">
   2023 - 50 ⭐ - Scala
