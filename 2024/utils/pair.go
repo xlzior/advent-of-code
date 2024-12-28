@@ -28,3 +28,7 @@ func (p1 Pair) Mod(p2 Pair) Pair {
 func (p Pair) TurnRight() Pair {
 	return Pair{p.C, -p.R}
 }
+
+func (p Pair) TurnLeft() Pair {
+	return Pair{-p.C, p.R}
+}
