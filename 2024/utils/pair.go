@@ -32,3 +32,10 @@ func (p Pair) TurnRight() Pair {
 func (p Pair) TurnLeft() Pair {
 	return Pair{-p.C, p.R}
 }
+
+var NSEW = []Pair{
+	{R: 0, C: 1},
+	{R: 0, C: -1},
+	{R: 1, C: 0},
+	{R: -1, C: 0},
+}
