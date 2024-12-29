@@ -38,7 +38,7 @@ type cheat struct {
 func countCheats(grid utils.Grid, path map[utils.Pair]int, cheatTime, threshold int) map[[2]utils.Pair]int {
 	cheats := make(map[[2]utils.Pair]int)
 	todo := make([]cheat, 0)
-	visited := map[cheat]bool{}
+	bestVisit := map[[2]utils.Pair]int{}
 
 	// initialise todo; every cell on the path is a potential starting point
 	for curr := range path {
@@ -46,7 +46,7 @@ func countCheats(grid utils.Grid, path map[utils.Pair]int, cheatTime, threshold 
 			next := curr.Plus(dir)
 			ch := cheat{start: curr, curr: next, time: 1}
 			todo = append(todo, ch)
-			visited[ch] = true
+			bestVisit[[2]utils.Pair{ch.start, ch.curr}] = ch.time
 		}
 	}
 	for len(todo) > 0 {
@@ -58,9 +58,11 @@ func countCheats(grid utils.Grid, path map[utils.Pair]int, cheatTime, threshold 
 			for _, dir := range utils.NSEW {
 				next := ch.curr.Plus(dir)
 				ch := cheat{start: ch.start, curr: next, time: ch.time + 1}
-				if grid.Contains(next) && !visited[ch] {
+				key := [2]utils.Pair{ch.start, ch.curr}
+				lastVisitTime, exists := bestVisit[key]
+				if grid.Contains(next) && (!exists || ch.time < lastVisitTime) {
 					todo = append(todo, ch)
-					visited[ch] = true
+					bestVisit[key] = ch.time
 				}
 			}
 		}
