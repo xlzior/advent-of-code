@@ -13,9 +13,8 @@ var dirs = []string{" ^A", "<v>"}
 var numpad = make(map[string]utils.Pair)
 var dirpad = make(map[string]utils.Pair)
 
-func complexity(code string, sequence string) int {
-	fmt.Println(code, len(sequence), utils.MustParseInt(code[:len(code)-1]), sequence)
-	return len(sequence) * utils.MustParseInt(code[:len(code)-1])
+func complexity(code string, length int) int {
+	return length * utils.MustParseInt(code[:len(code)-1])
 }
 
 type unit struct {
@@ -91,48 +90,53 @@ func getPermutations(delta utils.Pair) []string {
 	}
 }
 
-func getShortest(strs []string) string {
-	shortest := strs[0]
-	for _, s := range strs {
-		if len(s) < len(shortest) {
-			shortest = s
-		}
-	}
-	return shortest
+type key struct {
+	padlen int
+	start  string
+	end    string
+	n      int
 }
 
-func decompileSegment(pad map[string]utils.Pair, start, end string, n int) string {
+var cache = make(map[key]int)
+
+func decompileSegment(pad map[string]utils.Pair, start, end string, n int) int {
+	k := key{len(pad), start, end, n}
+	if value, exists := cache[k]; exists {
+		return value
+	}
+
 	delta := pad[end].Minus(pad[start])
 	perms := getPermutations(delta)
 
-	candidates := []string{}
+	result := -1
 	for _, perm := range perms {
 		if isIllegal(start, pad, perm) {
 			continue
 		}
+		length := 0
 		if n == 0 {
-			candidates = append(candidates, perm)
+			length = len(perm)
 		} else {
-			candidates = append(candidates, decompileSequence(dirpad, perm, n-1))
+			length = decompileSequence(dirpad, perm, n-1)
+		}
+		if result == -1 || length < result {
+			result = length
 		}
 	}
-	if len(candidates) == 1 {
-		return candidates[0]
-	} else {
-		return getShortest(candidates)
-	}
+	cache[k] = result
+	return result
 }
 
-func decompileSequence(pad map[string]utils.Pair, code string, n int) string {
-	result := []string{}
+func decompileSequence(pad map[string]utils.Pair, code string, n int) int {
+	result := 0
 	code = "A" + code
 	for i := 0; i < len(code)-1; i++ {
 		curr := string(code[i])
 		next := string(code[i+1])
-		seq := decompileSegment(pad, curr, next, n)
-		result = append(result, seq)
+		length := decompileSegment(pad, curr, next, n)
+		result += length
 	}
-	return strings.Join(result, "")
+	return result
 }
 
 func main() {
@@ -149,9 +153,11 @@ func main() {
 	}
 
 	part1 := 0
+	part2 := 0
 	for _, code := range lines {
-		seq := decompileSequence(numpad, code, 2)
-		part1 += complexity(code, seq)
+		part1 += complexity(code, decompileSequence(numpad, code, 2))
+		part2 += complexity(code, decompileSequence(numpad, code, 25))
 	}
 	fmt.Println("Part 1:", part1)
+	fmt.Println("Part 2:", part2)
 }

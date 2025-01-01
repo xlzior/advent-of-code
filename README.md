@@ -1,9 +1,9 @@
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  Advent of Code - 326/500 ⭐
+  Advent of Code - 328/500 ⭐
 </h1>
 <h1 align="center">
-  2024 - 48 ⭐ - Go
+  2024 - 50 ⭐ - Go
 </h1>
 <a href="2024/day01/main.go">
   <img src=".aoc_tiles/tiles/2024/01.png" width="161px">
