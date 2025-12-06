@@ -1,6 +1,6 @@
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  Advent of Code - 354/510 ⭐
+  Advent of Code - 354/512 ⭐
 </h1>
 <h1 align="center">
   2025 - 10 ⭐ - TypeScript

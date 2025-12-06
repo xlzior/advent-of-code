@@ -28,15 +28,9 @@ class RangeManager {
   }
 
   public add(range: Range) {
-    const overlaps: Range[] = [];
-    for (const existing of this.ranges) {
-      if (
-        existing.includes(range.start) || existing.includes(range.end) ||
-        range.includes(existing.start) || range.includes(existing.end)
-      ) {
-        overlaps.push(existing);
-      }
-    }
+    const overlaps = this.ranges.filter(
+      (existing) => existing.overlaps(range),
+    );
     if (overlaps.length > 0) {
       this.ranges = this.ranges.filter((range) => !overlaps.includes(range));
       overlaps.push(range);
