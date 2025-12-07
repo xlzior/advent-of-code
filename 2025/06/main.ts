@@ -10,19 +10,20 @@ function applyOperations(nums: number[][], ops: string[]) {
   );
 }
 
-const input = await readLines();
+function transpose(array: any[][]): any[][] {
+  return array[0].map((_, c) => array.map((row) => row[c]));
+}
 
+const input = await readLines();
 const operations = input[input.length - 1].trim().split(/\s+/);
-const rawNums = input.slice(0, input.length - 1);
-const rows = rawNums.map((row) =>
-  row.trim().split(/\s+/).map((n) => parseInt(n))
+const lines = input.slice(0, input.length - 1);
+
+const normal = transpose(
+  lines.map((row) => row.trim().split(/\s+/).map(Number)),
 );
-const normal = rows[0].map((_, c) => rows.map((row) => row[c]));
-const ceph = rawNums[0].split("").map((_, c) => rawNums.map((row) => row[c]))
-  .map((splitted) => splitted.join("").trim()).map((n) => n == "" ? "\n" : n)
-  .join(" ").split("\n").map((nums) =>
-    nums.trim().split(" ").map((n) => parseInt(n))
-  );
+const ceph = transpose(lines.map((line) => line.split("")))
+  .map((splitted) => splitted.join("").trim() || "\n")
+  .join(" ").split("\n").map((nums) => nums.trim().split(" ").map(Number));
 
 const part1 = applyOperations(normal, operations);
 const part2 = applyOperations(ceph, operations);
