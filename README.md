@@ -1,9 +1,9 @@
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  Advent of Code - 361/516 ⭐
+  Advent of Code - 362/516 ⭐
 </h1>
 <h1 align="center">
-  2025 - 14 ⭐ - TypeScript
+  2025 - 15 ⭐ - TypeScript
 </h1>
 <a href="2025/01/main.ts">
   <img src=".aoc_tiles/tiles/2025/01.png" width="161px">
@@ -25,6 +25,9 @@
 </a>
 <a href="2025/07/main.ts">
   <img src=".aoc_tiles/tiles/2025/07.png" width="161px">
+</a>
+<a href="2025/08/main.ts">
+  <img src=".aoc_tiles/tiles/2025/08.png" width="161px">
 </a>
 <h1 align="center">
   2024 - 50 ⭐ - Go
