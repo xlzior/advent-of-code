@@ -55,7 +55,14 @@ function allInside(
   const maxX = Math.max(firstCorner[0], secondCorner[0]);
   const maxY = Math.max(firstCorner[1], secondCorner[1]);
   for (let x = minX; x <= maxX; x++) {
-    for (let y = minY; y <= maxY; y++) {
+    for (const y of [minY, maxY]) {
+      if (!isInside(points, [x, y])) {
+        return false;
+      }
+    }
+  }
+  for (let y = minY; y <= maxY; y++) {
+    for (const x of [minX, maxX]) {
       if (!isInside(points, [x, y])) {
         return false;
       }
