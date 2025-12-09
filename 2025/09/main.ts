@@ -1,10 +1,6 @@
 import { readLines } from "../utils";
 
-const memo = new Map<string, boolean>();
 function isInside(points: number[][], point: number[]): boolean {
-  if (memo.has(point.toString())) {
-    return memo.get(point.toString())!;
-  }
   let crossings = 0;
   for (let i = 0; i < points.length; i++) {
     const a = points[i];
@@ -16,9 +12,7 @@ function isInside(points: number[][], point: number[]): boolean {
       const maxX = Math.max(a[0], b[0]);
       const withinX = minX <= point[0] && point[0] <= maxX;
       if (withinX && a[1] == point[1]) {
-        const result = true;
-        memo.set(point.toString(), result);
-        return result;
+        return true;
       }
     } else {
       // y-coordinates different, vertical line
@@ -29,17 +23,13 @@ function isInside(points: number[][], point: number[]): boolean {
 
       if (withinY && a[0] == point[0]) {
         // on the line
-        const result = true;
-        memo.set(point.toString(), result);
-        return result;
+        return true;
       } else if (withinY && a[0] > point[0]) {
         crossings++;
       }
     }
   }
-  const result = crossings % 2 === 1;
-  memo.set(point.toString(), result);
-  return result;
+  return crossings % 2 === 1;
 }
 
 function getRectangleCorners(firstCorner: number[], secondCorner: number[]) {
