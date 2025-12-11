@@ -1,6 +1,8 @@
 {
-  "dependencies": {},
   "devDependencies": {
     "bun-types": "^1.3.3"
+  },
+  "dependencies": {
+    "yalps": "^0.6.3"
   }
 }
