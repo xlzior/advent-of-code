@@ -1,45 +1,45 @@
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  Advent of Code - 371/524 ⭐
+  Advent of Code - 371/540 ⭐
 </h1>
 <h1 align="center">
   2025 - 24 ⭐ - TypeScript
 </h1>
 <a href="2025/01/main.ts">
-  <img src=".aoc_tiles/tiles/2025/01.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/01.png" width="203px">
 </a>
 <a href="2025/02/main.ts">
-  <img src=".aoc_tiles/tiles/2025/02.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/02.png" width="203px">
 </a>
 <a href="2025/03/main.ts">
-  <img src=".aoc_tiles/tiles/2025/03.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/03.png" width="203px">
 </a>
 <a href="2025/04/main.ts">
-  <img src=".aoc_tiles/tiles/2025/04.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/04.png" width="203px">
 </a>
 <a href="2025/05/main.ts">
-  <img src=".aoc_tiles/tiles/2025/05.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/05.png" width="203px">
 </a>
 <a href="2025/06/main.ts">
-  <img src=".aoc_tiles/tiles/2025/06.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/06.png" width="203px">
 </a>
 <a href="2025/07/main.ts">
-  <img src=".aoc_tiles/tiles/2025/07.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/07.png" width="203px">
 </a>
 <a href="2025/08/main.ts">
-  <img src=".aoc_tiles/tiles/2025/08.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/08.png" width="203px">
 </a>
 <a href="2025/09/main.ts">
-  <img src=".aoc_tiles/tiles/2025/09.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/09.png" width="203px">
 </a>
 <a href="2025/10/main.ts">
-  <img src=".aoc_tiles/tiles/2025/10.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/10.png" width="203px">
 </a>
 <a href="2025/11/main.ts">
-  <img src=".aoc_tiles/tiles/2025/11.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/11.png" width="203px">
 </a>
 <a href="2025/12/main.ts">
-  <img src=".aoc_tiles/tiles/2025/12.png" width="161px">
+  <img src=".aoc_tiles/tiles/2025/12.png" width="203px">
 </a>
 <h1 align="center">
   2024 - 50 ⭐ - Go
